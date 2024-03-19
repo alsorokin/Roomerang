@@ -60,8 +60,8 @@ function App() {
         position.current.appleNextX = Math.random() * (fieldWidth - boomerangRadius);
         position.current.appleNextY = Math.random() * (fieldHeight - boomerangRadius);
         const newAppleNextStyle = {
-            left: position.current.appleNextX - appleRadius / 2 + 'px',
-            top: position.current.appleNextY - appleRadius / 2 + 'px',
+            left: position.current.appleNextX - appleNextRadius / 2 + 'px',
+            top: position.current.appleNextY - appleNextRadius / 2 + 'px',
         };
         setAppleNextStyle(newAppleNextStyle);
 
