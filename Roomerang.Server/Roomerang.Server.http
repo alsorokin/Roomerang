@@ -1,0 +1,6 @@
+@Roomerang.Server_HostAddress = http://localhost:5081
+
+GET {{Roomerang.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

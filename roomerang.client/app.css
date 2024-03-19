@@ -1,0 +1,74 @@
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+.boom {
+    position: absolute;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-name: rotation;
+    animation-duration: 1s;
+    width: 42px;
+    height: 42px;
+}
+
+.boom.top {
+    left: 358px;
+    top: 0px;
+}
+
+.boom.bottom {
+    left: 0;
+    top: 633px;
+}
+
+.apple {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+}
+
+.apple.next {
+    width: 10px;
+    height: 10px;
+}
+
+.field {
+    position: absolute;
+    background-color: cornflowerblue;
+    width: 400px;
+    height: 675px;
+}
+
+.fieldContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.score {
+    position: absolute;
+    font-size: 24px;
+    color: yellow;
+}
+
+.score.top {
+    left: 0px;
+    top: 0px;
+    text-align: right;
+    width: 390px;
+}
+
+.score.bottom {
+    left: 10px;
+    top: 633px;
+    text-align: left;
+    width: 390px;
+}
