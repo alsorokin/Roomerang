@@ -39,6 +39,12 @@
     height: 10px;
 }
 
+.ball {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+}
+
 .field {
     position: absolute;
     background-color: cornflowerblue;

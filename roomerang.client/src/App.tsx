@@ -5,6 +5,7 @@ import { distanceBetweenPoints } from './helpers';
 const boomerangRadius = 42;
 const appleRadius = 28;
 const appleNextRadius = 10;
+const ballRadius = 42;
 const fieldWidth = 400;
 const fieldHeight = 675;
 const renderInterval = 5;
@@ -19,6 +20,7 @@ function App() {
     const antiboom = useRef<HTMLImageElement | null>(null);
     const apple = useRef<HTMLImageElement | null>(null);
     const appleNext = useRef<HTMLImageElement | null>(null);
+    const ball = useRef<HTMLImageElement | null>(null);
     const position = useRef({
         boomX: boomerangRadius / 2,
         boomY: boomerangInitialY,
@@ -28,6 +30,8 @@ function App() {
         appleY: -1,
         appleNextX: -1,
         appleNextY: -1,
+        ballX: -1,
+        ballY: -1,
     });
     const momentum = useRef({
         boomX: 0,
@@ -45,6 +49,7 @@ function App() {
     const [antiboomerangStyle, setAntiboomerangStyle] = useState(initialBoomerangStyle);
     const [appleStyle, setAppleStyle] = useState({ left: '', top: '' });
     const [appleNextStyle, setAppleNextStyle] = useState({ left: '', top: '' });
+    const [ballStyle, setBallStyle] = useState({ left: '', top: '' });
     const [scoreText, setScoreText] = useState('0');
     const [antiscoreText, setAntiscoreText] = useState('0');
 
@@ -64,6 +69,15 @@ function App() {
             top: position.current.appleNextY - appleNextRadius / 2 + 'px',
         };
         setAppleNextStyle(newAppleNextStyle);
+
+        // Set initial ball position
+        position.current.ballX = ballRadius + Math.random() * (fieldWidth - ballRadius * 3);
+        position.current.ballY = ballRadius + Math.random() * (fieldHeight - ballRadius * 3);
+        const newBallStyle = {
+            left: position.current.ballX - ballRadius / 2 + 'px',
+            top: position.current.ballY - ballRadius / 2 + 'px',
+        };
+        setBallStyle(newBallStyle);
 
         // Game loop
         let interval = setInterval(() => {
@@ -118,6 +132,21 @@ function App() {
                 setAntiscoreText((++antiscore.current).toString());
             }
 
+            // Check for ball collision
+            const boomBallDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.ballX, position.current.ballY);
+            const antiboomBallDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.ballX, position.current.ballY);
+            if (boomBallDistance < boomerangRadius / 2 + ballRadius / 2) {
+                resetBall();
+                resetBoomerang();
+                score.current -= 3;
+                setScoreText(score.current.toString());
+            } else if (antiboomBallDistance < boomerangRadius / 2 + ballRadius / 2) {
+                resetBall();
+                resetAntiboomerang();
+                antiscore.current -= 3;
+                setAntiscoreText(antiscore.current.toString());
+            }
+
             function resetApple() {
                 // put apple to next position
                 position.current.appleX = position.current.appleNextX;
@@ -137,6 +166,41 @@ function App() {
                 };
                 setAppleNextStyle(newAppleNextStyle);
             }
+
+            function resetBall() {
+                position.current.ballX = ballRadius + Math.random() * (fieldWidth - ballRadius * 3);
+                position.current.ballY = ballRadius + Math.random() * (fieldHeight - ballRadius * 3);
+                const newBallStyle = {
+                    left: position.current.ballX - ballRadius / 2 + 'px',
+                    top: position.current.ballY - ballRadius / 2 + 'px',
+                };
+                setBallStyle(newBallStyle);
+            }
+
+            function resetBoomerang() {
+                boomerangLaunched.current = false;
+                momentum.current.boomY = 0;
+                position.current.boomY = fieldHeight - boomerangRadius / 2;
+                const newBoomStyle = {
+                    left: position.current.boomX + 'px',
+                    top: position.current.boomY + 'px',
+                    animationPlayState: 'paused'
+                };
+                setBoomerangStyle(newBoomStyle);
+            }
+
+            function resetAntiboomerang() {
+                antiboomerangLaunched.current = false;
+                momentum.current.antiboomY = 0;
+                position.current.antiboomY = boomerangRadius / 2;
+                const newAntiboomStyle = {
+                    left: position.current.antiboomX + 'px',
+                    top: position.current.antiboomY + 'px',
+                    animationPlayState: 'paused'
+                };
+                setAntiboomerangStyle(newAntiboomStyle);
+            }
+
         }, renderInterval);
         return () => clearInterval(interval);
     }, []);
@@ -159,6 +223,7 @@ function App() {
                 <img ref={antiboom} className="boom top" src="src/assets/boom_top_42.png" style={antiboomerangStyle} />
                 <img ref={apple} className="apple" src="src/assets/apple_green_28.png" style={appleStyle} />
                 <img ref={appleNext} className="apple next" src="src/assets/apple_green_28.png" style={appleNextStyle} />
+                <img ref={ball} className="ball" src="src/assets/ball_42.png" style={ballStyle} />
             </div>
         </div>
     );
