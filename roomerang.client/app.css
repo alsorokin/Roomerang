@@ -1,19 +1,10 @@
-@keyframes rotation {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(359deg);
-    }
-}
-
 .boom {
     position: absolute;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
     animation-name: rotation;
     animation-duration: 1s;
+    animation-play-state: paused;
     width: 42px;
     height: 42px;
 }
@@ -41,6 +32,10 @@
 
 .ball {
     position: absolute;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-name: rotation;
+    animation-duration: 2s;
     width: 42px;
     height: 42px;
 }
@@ -77,4 +72,14 @@
     top: 633px;
     text-align: left;
     width: 390px;
+}
+
+@keyframes rotation {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
 }
