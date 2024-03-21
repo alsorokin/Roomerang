@@ -13,6 +13,12 @@ const momentumCoefficient = 75000 / renderInterval;
 const boomerangInitialY = fieldHeight - boomerangRadius / 2;
 const antiboomerangInitialY = boomerangRadius / 2;
 const initialBoomerangStyle = { left: '', top: '', animationPlayState: "paused" };
+const tracerCount = 60;
+
+interface Coords {
+    x: number;
+    y: number;
+}
 
 function App() {
     // Refs
@@ -48,6 +54,10 @@ function App() {
     const ballMoving = useRef(false);
     const score = useRef(0);
     const antiscore = useRef(0);
+    const tracerCoords = useRef<Coords[]>([]);
+    const drawBoomTracers = useRef(false);
+    const drawAntiboomTracers = useRef(false);
+    const showTracersTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -105,7 +115,7 @@ function App() {
             if (boom.current === null || antiboom.current == null) return;
 
             // Move boomerang
-            momentum.current.boomX += -((position.current.boomX - fieldWidth / 2) / momentumCoefficient);
+            momentum.current.boomX -= (position.current.boomX - fieldWidth / 2) / momentumCoefficient;
             position.current.boomX = position.current.boomX + momentum.current.boomX;
             if (boomerangLaunched.current && position.current.boomY > boomerangInitialY) {
                 boomerangLaunched.current = false;
@@ -113,8 +123,8 @@ function App() {
                 momentum.current.boomY = 0;
             }
             else if (boomerangLaunched.current) {
-                momentum.current.boomY += -((position.current.boomY - fieldHeight / 2) / momentumCoefficient);
-                position.current.boomY = position.current.boomY + momentum.current.boomY;
+                momentum.current.boomY -= (position.current.boomY - fieldHeight / 2) / momentumCoefficient;
+                position.current.boomY += momentum.current.boomY;
             }
             const newBoomerangStyle = {
                 left: position.current.boomX - boomerangRadius / 2 + 'px',
@@ -123,8 +133,30 @@ function App() {
             };
             setBoomerangStyle(newBoomerangStyle);
 
+            // predict next position of the boomerang and draw tracers there
+            const drawEvery = 10;
+            if (drawBoomTracers.current && !boomerangLaunched.current) {
+                let predictionX = position.current.boomX;
+                let predictionY = position.current.boomY;
+                let predictionMomentumX = momentum.current.boomX;
+                let predictionMomentumY = momentum.current.boomY;
+                for (let i = 0; i < tracerCount * drawEvery; i++) {
+                    predictionMomentumX -= (predictionX - fieldWidth / 2) / momentumCoefficient;
+                    predictionX += predictionMomentumX;
+                    predictionMomentumY -= (predictionY - fieldHeight / 2) / momentumCoefficient;
+                    predictionY += predictionMomentumY;
+                    if (i % drawEvery === 0) {
+                        tracerCoords.current[i] = { x: predictionX, y: predictionY };
+                    }
+                }
+            } else if (tracerCoords.current[drawEvery] && tracerCoords.current[drawEvery].x != -10000) {
+                for (let i = 0; i < tracerCount * drawEvery; i += drawEvery) {
+                    tracerCoords.current[i] = { x: -10000, y: -10000 };
+                }
+            }
+
             // Move antiboomerang
-            momentum.current.antiboomX += -((position.current.antiboomX - fieldWidth / 2) / momentumCoefficient);
+            momentum.current.antiboomX -= (position.current.antiboomX - fieldWidth / 2) / momentumCoefficient;
             position.current.antiboomX = position.current.antiboomX + momentum.current.antiboomX;
             if (antiboomerangLaunched.current && position.current.antiboomY < antiboomerangInitialY) {
                 antiboomerangLaunched.current = false;
@@ -132,8 +164,8 @@ function App() {
                 momentum.current.antiboomY = 0;
             }
             else if (antiboomerangLaunched.current) {
-                momentum.current.antiboomY += -((position.current.antiboomY - fieldHeight / 2) / momentumCoefficient);
-                position.current.antiboomY = position.current.antiboomY + momentum.current.antiboomY;
+                momentum.current.antiboomY -= (position.current.antiboomY - fieldHeight / 2) / momentumCoefficient;
+                position.current.antiboomY += momentum.current.antiboomY;
             }
             const newAntiboomerangStyle = {
                 left: position.current.antiboomX - boomerangRadius / 2 + 'px',
@@ -271,9 +303,32 @@ function App() {
         }
     }
 
+    function handleMouseDown(event: React.MouseEvent<HTMLDivElement>) {
+        clearTimeout(showTracersTimeout.current);
+        const clickYRelative = event.clientY - event.currentTarget.getBoundingClientRect().top;
+        showTracersTimeout.current = setTimeout(() => {
+            if (clickYRelative > fieldHeight / 2) {
+                drawBoomTracers.current = true;
+            } else {
+                drawAntiboomTracers.current = true;
+            }
+        }, 1000);
+    }
+
+    function handleMouseRelease() {
+        drawBoomTracers.current = false;
+        drawAntiboomTracers.current = false;
+        clearTimeout(showTracersTimeout.current);
+    }
+
     return (
         <div className="fieldContainer">
-            <div className="field" onClick={handleFieldClick}>
+            <div className="field" onClick={handleFieldClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseRelease}>
+                {
+                    tracerCoords.current.map((coords, index) =>
+                        <img key={index} className="tracer" style={{ left: coords ? coords.x - 5 + 'px' : '', top: coords ? coords.y - 5 + 'px' : '' }} src="src/assets/tracer_10.png" />
+                    )
+                }
                 <div key="score-bottom" className="score bottom">{scoreText}</div>
                 <div key="score-top" className="score top">{antiscoreText}</div>
                 <img key="boomerang" ref={boom} className="boom bottom" src="src/assets/boom_bot_42.png" style={boomerangStyle} />

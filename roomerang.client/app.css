@@ -74,6 +74,10 @@
     width: 390px;
 }
 
+.tracer {
+    position: absolute;
+}
+
 @keyframes rotation {
     from {
         transform: rotate(0deg);
