@@ -11,8 +11,8 @@ const constants = {
     momentumCoefficient: 0, // reassigned below
     boomerangInitialY: 0, // reassigned below
     antiboomerangInitialY: 0, // reassigned below
-    aiCheckInterval: 100,
-    ballMovementInterval: 5000 * 100,
+    aiCheckInterval: 500,
+    ballMovementInterval: 15000,
 };
 
 constants.momentumCoefficient = 75000 / constants.renderInterval;

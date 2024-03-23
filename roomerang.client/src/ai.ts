@@ -16,10 +16,8 @@ export default function ai(boomX: number, boomY: number, momX: number, momY: num
         predictionMomentumY = calculateMomentumY(predictionMomentumY, predictionY);
         predictionY += predictionMomentumY;
         if (distanceBetweenPoints(predictionX, predictionY, ballX, ballY) < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
-            console.log("will hit the ball, i=", i);
             return false;
         } else if (distanceBetweenPoints(predictionX, predictionY, appleX, appleY) < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
-            console.log("will hit the apple, i=", i);
             return true;
         }
     }

@@ -211,10 +211,12 @@ function App() {
             const antiboomDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.appleX, position.current.appleY);
             if (boomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
                 resetApple();
-                setScoreText((++score.current).toString());
+                score.current += 2;
+                setScoreText((score.current).toString());
             } else if (antiboomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
                 resetApple();
-                setAntiscoreText((++antiscore.current).toString());
+                antiscore.current += 2;
+                setAntiscoreText((antiscore.current).toString());
             }
 
             // Check for ball collision
@@ -315,13 +317,13 @@ function App() {
 
     function handleMouseDown(event: React.MouseEvent<HTMLDivElement>) {
         clearTimeout(showTracersTimeout.current);
-        const clickYRelative = event.clientY - event.currentTarget.getBoundingClientRect().top;
+        // const clickYRelative = event.clientY - event.currentTarget.getBoundingClientRect().top;
         showTracersTimeout.current = setTimeout(() => {
-            if (clickYRelative > cnst.fieldHeight / 2) {
+        //    if (clickYRelative > cnst.fieldHeight / 2) {
                 drawBoomTracers.current = true;
-            } else {
-                drawAntiboomTracers.current = true;
-            }
+        //    } else {
+        //        drawAntiboomTracers.current = true;
+        //    }
         }, 1000);
     }
 
