@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, CSSProperties } from 'react';
 import './App.css';
 import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY } from './helpers';
 import cnst from './constants';
@@ -8,6 +8,8 @@ interface Coords {
     x: number;
     y: number;
 }
+
+const initialBoomerangStyle: CSSProperties = { left: '', top: '', animationPlayState: "paused", visibility: 'visible' };
 
 function App() {
     // Refs
@@ -40,6 +42,8 @@ function App() {
     });
     const boomerangLaunched = useRef(false);
     const antiboomerangLaunched = useRef(false);
+    const boomerangIncapacityRemaining = useRef(0);
+    const antiboomerangIncapacityRemaining = useRef(0);
     const ballMoving = useRef(false);
     const score = useRef(0);
     const antiscore = useRef(0);
@@ -49,19 +53,21 @@ function App() {
     const showTracersTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
     const ticks = useRef(0);
     const lastAiCheck = useRef(0);
+    const paused = useRef(true);
+    const lastBallMove = useRef(0);
 
     // State
-    const [boomerangStyle, setBoomerangStyle] = useState(cnst.initialBoomerangStyle);
-    const [antiboomerangStyle, setAntiboomerangStyle] = useState(cnst.initialBoomerangStyle);
-    const [appleStyle, setAppleStyle] = useState({
+    const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
+    const [antiboomerangStyle, setAntiboomerangStyle] = useState(initialBoomerangStyle);
+    const [appleStyle, setAppleStyle] = useState<CSSProperties>({
         left: '',
         top: '',
     });
-    const [appleNextStyle, setAppleNextStyle] = useState({
+    const [appleNextStyle, setAppleNextStyle] = useState<CSSProperties>({
         left: '',
         top: '',
     });
-    const [ballStyle, setBallStyle] = useState({
+    const [ballStyle, setBallStyle] = useState <CSSProperties>({
         left: '',
         top: '',
         animationPlayState: 'paused',
@@ -72,15 +78,15 @@ function App() {
 
     useEffect(() => {
         // Set initial apple position
-        position.current.appleX = Math.random() * (cnst.fieldWidth - cnst.boomerangDiameter);
-        position.current.appleY = Math.random() * (cnst.fieldHeight - cnst.boomerangDiameter);
+        position.current.appleX = cnst.appleDiameter + Math.random() * (cnst.fieldWidth - cnst.appleDiameter * 2);
+        position.current.appleY = cnst.appleDiameter + Math.random() * (cnst.fieldHeight - cnst.appleDiameter * 2);
         const newAppleStyle = {
             left: position.current.appleX - cnst.appleDiameter / 2 + 'px',
             top: position.current.appleY - cnst.appleDiameter / 2 + 'px',
         };
         setAppleStyle(newAppleStyle);
-        position.current.appleNextX = Math.random() * (cnst.fieldWidth - cnst.boomerangDiameter);
-        position.current.appleNextY = Math.random() * (cnst.fieldHeight - cnst.boomerangDiameter);
+        position.current.appleNextX = cnst.appleDiameter + Math.random() * (cnst.fieldWidth - cnst.appleDiameter * 2);
+        position.current.appleNextY = cnst.appleDiameter + Math.random() * (cnst.fieldHeight - cnst.appleDiameter * 2);
         const newAppleNextStyle = {
             left: position.current.appleNextX - cnst.appleNextDiameter / 2 + 'px',
             top: position.current.appleNextY - cnst.appleNextDiameter / 2 + 'px',
@@ -88,8 +94,8 @@ function App() {
         setAppleNextStyle(newAppleNextStyle);
 
         // Set initial ball position
-        position.current.ballX = cnst.ballDiameter + Math.random() * (cnst.fieldWidth - cnst.ballDiameter * 3);
-        position.current.ballY = cnst.ballDiameter * 2 + Math.random() * (cnst.fieldHeight - cnst.ballDiameter * 5);
+        position.current.ballX = cnst.fieldWidth / 2;
+        position.current.ballY = cnst.fieldHeight / 2;
         const newBallStyle = {
             left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
             top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
@@ -98,16 +104,17 @@ function App() {
         };
         setBallStyle(newBallStyle);
 
-        // Occasional ball movement
-        let ballMoveTimeout = setTimeout(startMovingBall, cnst.ballMovementInterval);
-
         // Game loop
         const gameLoop = setInterval(() => {
-            ticks.current += cnst.renderInterval;
             if (boom.current === null || antiboom.current == null) return;
+            if (paused.current) return;
+
+            ticks.current += cnst.renderInterval;
+            if (boomerangIncapacityRemaining.current >= 0) boomerangIncapacityRemaining.current -= cnst.renderInterval;
+            if (antiboomerangIncapacityRemaining.current >= 0) antiboomerangIncapacityRemaining.current -= cnst.renderInterval;
 
             // Ask AI if we should launch antiboomerang
-            if (!antiboomerangLaunched.current && ticks.current - lastAiCheck.current > cnst.aiCheckInterval) {
+            if (!antiboomerangLaunched.current && antiboomerangIncapacityRemaining.current <= 0 && ticks.current - lastAiCheck.current > cnst.aiCheckInterval) {
                 lastAiCheck.current = ticks.current;
                 const shouldLaunchAntiboomerang = ai(
                     position.current.antiboomX,
@@ -121,6 +128,7 @@ function App() {
                 );
                 if (shouldLaunchAntiboomerang) {
                     antiboomerangLaunched.current = true;
+                    lastAiCheck.current += 7000; // postpone next AI check
                 }
             }
 
@@ -136,15 +144,18 @@ function App() {
                 momentum.current.boomY = calculateMomentumY(momentum.current.boomY, position.current.boomY);
                 position.current.boomY += momentum.current.boomY;
             }
-            const newBoomerangStyle = {
+            const boomVisibility = boomerangIncapacityRemaining.current > 0 &&
+                Math.floor(boomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0 ? 'hidden' : 'visible';
+            const newBoomerangStyle: CSSProperties = {
                 left: position.current.boomX - cnst.boomerangDiameter / 2 + 'px',
                 top: position.current.boomY - cnst.boomerangDiameter / 2 + 'px',
                 animationPlayState: boomerangLaunched.current ? 'running' : 'paused',
+                visibility: boomVisibility,
             };
             setBoomerangStyle(newBoomerangStyle);
 
             // predict next position of the boomerang and draw tracers there
-            const drawEvery = 10;
+            const drawEvery = 5;
             if (drawBoomTracers.current && !boomerangLaunched.current) {
                 let predictionX = position.current.boomX;
                 let predictionY = position.current.boomY;
@@ -177,10 +188,13 @@ function App() {
                 momentum.current.antiboomY = calculateMomentumY(momentum.current.antiboomY, position.current.antiboomY);
                 position.current.antiboomY += momentum.current.antiboomY;
             }
-            const newAntiboomerangStyle = {
+            const aboomVisibility = antiboomerangIncapacityRemaining.current > 0 &&
+                Math.floor(antiboomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0 ? 'hidden' : 'visible';
+            const newAntiboomerangStyle: CSSProperties = {
                 left: position.current.antiboomX - cnst.boomerangDiameter / 2 + 'px',
                 top: position.current.antiboomY - cnst.boomerangDiameter / 2 + 'px',
                 animationPlayState: antiboomerangLaunched.current ? 'running' : 'paused',
+                visibility: aboomVisibility,
             };
             setAntiboomerangStyle(newAntiboomerangStyle);
 
@@ -192,8 +206,7 @@ function App() {
                     ballMoving.current = false;
                     momentum.current.ballX = 0;
                     momentum.current.ballY = 0;
-                    clearTimeout(ballMoveTimeout);
-                    ballMoveTimeout = setTimeout(startMovingBall, cnst.ballMovementInterval);
+                    lastBallMove.current = ticks.current;
                 }
                 position.current.ballX = position.current.ballX + momentum.current.ballX;
                 position.current.ballY = position.current.ballY + momentum.current.ballY;
@@ -204,19 +217,30 @@ function App() {
                     animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
                 };
                 setBallStyle(newBallStyle);
+            } else {
+                // if ball is not moving, check if it's time to move it
+                if (ticks.current - lastBallMove.current > cnst.ballMovementInterval) {
+                    startMovingBall();
+                };
             }
 
             // Check for apple collision
-            const boomDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.appleX, position.current.appleY);
-            const antiboomDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.appleX, position.current.appleY);
-            if (boomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
-                resetApple();
-                score.current += 2;
-                setScoreText((score.current).toString());
-            } else if (antiboomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
-                resetApple();
-                antiscore.current += 2;
-                setAntiscoreText((antiscore.current).toString());
+            if (boomerangIncapacityRemaining.current <= 0) {
+                const boomDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.appleX, position.current.appleY);
+                if (boomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
+                    resetApple();
+                    score.current += 2;
+                    setScoreText((score.current).toString());
+                }
+            }
+
+            if (antiboomerangIncapacityRemaining.current <= 0) {
+                const antiboomDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.appleX, position.current.appleY);
+                if (antiboomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
+                    resetApple();
+                    antiscore.current += 2;
+                    setAntiscoreText((antiscore.current).toString());
+                }
             }
 
             // Check for ball collision
@@ -227,11 +251,13 @@ function App() {
                 resetBoomerang();
                 score.current -= 3;
                 setScoreText(score.current.toString());
+                boomerangIncapacityRemaining.current = cnst.incapacityDuration;
             } else if (antiboomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
                 startMovingBall();
                 resetAntiboomerang();
                 antiscore.current -= 3;
                 setAntiscoreText(antiscore.current.toString());
+                antiboomerangIncapacityRemaining.current = cnst.incapacityDuration;
             }
 
             function resetApple() {
@@ -245,8 +271,8 @@ function App() {
                 setAppleStyle(newAppleStyle);
 
                 // generate next apple position
-                position.current.appleNextX = Math.random() * (cnst.fieldWidth - cnst.boomerangDiameter);
-                position.current.appleNextY = Math.random() * (cnst.fieldHeight - cnst.boomerangDiameter);
+                position.current.appleNextX = cnst.appleDiameter + Math.random() * (cnst.fieldWidth - cnst.appleDiameter * 2);
+                position.current.appleNextY = cnst.appleDiameter + Math.random() * (cnst.fieldHeight - cnst.appleDiameter * 2);
                 const newAppleNextStyle = {
                     left: position.current.appleNextX - cnst.appleNextDiameter / 2 + 'px',
                     top: position.current.appleNextY - cnst.appleNextDiameter / 2 + 'px',
@@ -258,10 +284,11 @@ function App() {
                 boomerangLaunched.current = false;
                 momentum.current.boomY = 0;
                 position.current.boomY = cnst.fieldHeight - cnst.boomerangDiameter / 2;
-                const newBoomStyle = {
+                const newBoomStyle: CSSProperties = {
                     left: position.current.boomX + 'px',
                     top: position.current.boomY + 'px',
                     animationPlayState: 'paused',
+                    visibility: 'visible',
                 };
                 setBoomerangStyle(newBoomStyle);
             }
@@ -270,10 +297,11 @@ function App() {
                 antiboomerangLaunched.current = false;
                 momentum.current.antiboomY = 0;
                 position.current.antiboomY = cnst.boomerangDiameter / 2;
-                const newAntiboomStyle = {
+                const newAntiboomStyle: CSSProperties = {
                     left: position.current.antiboomX + 'px',
                     top: position.current.antiboomY + 'px',
                     animationPlayState: 'paused',
+                    visibility: 'visible',
                 };
                 setAntiboomerangStyle(newAntiboomStyle);
             }
@@ -281,7 +309,6 @@ function App() {
         }, cnst.renderInterval);
 
         function startMovingBall() {
-            clearTimeout(ballMoveTimeout);
             ballMoving.current = true;
             position.current.ballNextX = cnst.ballDiameter + Math.random() * (cnst.fieldWidth - cnst.ballDiameter * 3);
             position.current.ballNextY = cnst.ballDiameter * 2 + Math.random() * (cnst.fieldHeight - cnst.ballDiameter * 5);
@@ -302,20 +329,24 @@ function App() {
 
         return () => {
             clearInterval(gameLoop);
-            clearTimeout(ballMoveTimeout);
+            clearTimeout(showTracersTimeout.current);
         };
     }, []);
 
     function handleFieldClick() { //(event: React.MouseEvent<HTMLDivElement>) {
+        if (paused.current) return;
         // const clickYRelative = event.clientY - event.currentTarget.getBoundingClientRect().top;
         // if (clickYRelative > fieldHeight / 2) {
+        if (!boomerangLaunched.current && boomerangIncapacityRemaining.current <= 0) {
             boomerangLaunched.current = true;
+        }
         // } else {
         //    antiboomerangLaunched.current = true;
         // }
     }
 
-    function handleMouseDown(event: React.MouseEvent<HTMLDivElement>) {
+    function handleMouseDown() { // (event: React.MouseEvent<HTMLDivElement>) {
+        if (paused.current) return;
         clearTimeout(showTracersTimeout.current);
         // const clickYRelative = event.clientY - event.currentTarget.getBoundingClientRect().top;
         showTracersTimeout.current = setTimeout(() => {
@@ -328,26 +359,56 @@ function App() {
     }
 
     function handleMouseRelease() {
+        if (paused.current) return;
         drawBoomTracers.current = false;
         drawAntiboomTracers.current = false;
         clearTimeout(showTracersTimeout.current);
     }
 
+    function pauseGame() {
+        paused.current = true;
+        const newBoomerangStyle: CSSProperties = {
+            top: position.current.boomY - cnst.boomerangDiameter / 2,
+            left: position.current.boomX - cnst.boomerangDiameter / 2,
+            animationPlayState: 'paused',
+        };
+        setBoomerangStyle(newBoomerangStyle);
+        const newAntiboomerangStyle: CSSProperties = {
+            top: position.current.antiboomY - cnst.boomerangDiameter / 2,
+            left: position.current.antiboomX - cnst.boomerangDiameter / 2,
+            animationPlayState: 'paused',
+        };
+        setAntiboomerangStyle(newAntiboomerangStyle);
+        const newBallStyle = {
+            top: position.current.ballY - cnst.ballDiameter / 2,
+            left: position.current.ballX - cnst.ballDiameter / 2,
+            animationPlayState: 'paused',
+        };
+        setBallStyle(newBallStyle);
+    }
+
+    function unpauseGame() {
+        paused.current = false;
+    }
+
     return (
         <div className="fieldContainer">
-            <div className="field" onClick={handleFieldClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseRelease}>
-                {
-                    tracerCoords.current.map((coords, index) =>
-                        <img key={`tracer-${index}`} className="tracer" style={{ left: coords ? coords.x - 5 + 'px' : '', top: coords ? coords.y - 5 + 'px' : '' }} src="src/assets/tracer_10.png" />
-                    )
-                }
-                <div key="score-bottom" className="score bottom">{scoreText}</div>
-                <div key="score-top" className="score top">{antiscoreText}</div>
-                <img key="boomerang" ref={boom} className="boom bottom" src="src/assets/boom_bot_42.png" style={boomerangStyle} />
-                <img key="antiboomerang" ref={antiboom} className="boom top" src="src/assets/boom_top_42.png" style={antiboomerangStyle} />
-                <img key="apple" ref={apple} className="apple" src="src/assets/apple_green_28.png" style={appleStyle} />
-                <img key="apple-next" ref={appleNext} className="apple next" src="src/assets/apple_green_28.png" style={appleNextStyle} />
-                <img key="ball" ref={ball} className="ball" src="src/assets/ball_42.png" style={ballStyle} />
+            <div className="gameWindow">
+                <div className="field" onClick={handleFieldClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseRelease}>
+                    {
+                        tracerCoords.current.map((coords, index) =>
+                            <img key={`tracer-${index}`} className="tracer" style={{ left: coords ? coords.x - 5 + 'px' : '', top: coords ? coords.y - 5 + 'px' : '' }} src="src/assets/tracer_10.png" />
+                        )
+                    }
+                    <div key="score-bottom" className="score bottom">{scoreText}</div>
+                    <div key="score-top" className="score top">{antiscoreText}</div>
+                    <img key="boomerang" ref={boom} className="boom bottom" src="src/assets/boom_bot_42.png" style={boomerangStyle} />
+                    <img key="antiboomerang" ref={antiboom} className="boom top" src="src/assets/boom_top_42.png" style={antiboomerangStyle} />
+                    <img key="apple" ref={apple} className="apple" src="src/assets/apple_green_28.png" style={appleStyle} />
+                    <img key="apple-next" ref={appleNext} className="apple next" src="src/assets/apple_green_28.png" style={appleNextStyle} />
+                    <img key="ball" ref={ball} className="ball" src="src/assets/ball_42.png" style={ballStyle} />
+                </div>
+                <input type="button" className="btn pause" value={paused.current ? "Unpause" : "Pause"} onClick={() => paused.current ? unpauseGame() : pauseGame()} />
             </div>
         </div>
     );

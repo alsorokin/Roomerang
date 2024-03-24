@@ -40,11 +40,20 @@
     height: 42px;
 }
 
+.gameWindow {
+    position: absolute;
+    width: 600px;
+    height: 800px;
+    background-color: #f1f1f1;
+}
+
 .field {
     position: absolute;
     background-color: cornflowerblue;
     width: 400px;
     height: 675px;
+    left: 100px;
+    top: 62px;
 }
 
 .fieldContainer {
@@ -61,21 +70,37 @@
 }
 
 .score.top {
-    left: 0px;
+    left: 10px;
     top: 0px;
-    text-align: right;
+    text-align: left;
     width: 390px;
 }
 
 .score.bottom {
-    left: 10px;
+    left: 0px;
     top: 633px;
-    text-align: left;
+    text-align: right;
     width: 390px;
 }
 
 .tracer {
     position: absolute;
+}
+
+.btn {
+    width: 100px;
+    height: 50px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.pause {
+    position: absolute;
+    left: 250px;
+    top: 743px;
 }
 
 @keyframes rotation {
