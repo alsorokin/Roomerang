@@ -53,8 +53,9 @@ function App() {
     const showTracersTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
     const ticks = useRef(0);
     const lastAiCheck = useRef(0);
-    const paused = useRef(true);
+    const paused = useRef(false);
     const lastBallMove = useRef(0);
+    const tracerDrawCount = useRef(0);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -103,6 +104,11 @@ function App() {
             animationDirection: 'normal',
         };
         setBallStyle(newBallStyle);
+
+        // Set initial tracer coords
+        for (let i = 0; i < cnst.tracerCount * cnst.tracerDrawEvery; i += cnst.tracerDrawEvery) {
+            tracerCoords.current[i] = { x: -10000, y: -10000 };
+        }
 
         // Game loop
         const gameLoop = setInterval(() => {
@@ -157,11 +163,14 @@ function App() {
             // predict next position of the boomerang and draw tracers there
             const drawEvery = 5;
             if (drawBoomTracers.current && !boomerangLaunched.current) {
+                if (tracerDrawCount.current < cnst.tracerCount) {
+                    tracerDrawCount.current += 0.5;
+                }
                 let predictionX = position.current.boomX;
                 let predictionY = position.current.boomY;
                 let predictionMomentumX = momentum.current.boomX;
                 let predictionMomentumY = momentum.current.boomY;
-                for (let i = 0; i < cnst.tracerCount * drawEvery; i++) {
+                for (let i = 0; i < tracerDrawCount.current * drawEvery; i++) {
                     predictionMomentumX = calculateMomentumX(predictionMomentumX, predictionX);
                     predictionX += predictionMomentumX;
                     predictionMomentumY = calculateMomentumY(predictionMomentumY, predictionY);
@@ -170,9 +179,11 @@ function App() {
                         tracerCoords.current[i] = { x: predictionX, y: predictionY };
                     }
                 }
-            } else if (tracerCoords.current[drawEvery] && tracerCoords.current[drawEvery].x != -10000) {
-                for (let i = 0; i < cnst.tracerCount * drawEvery; i += drawEvery) {
-                    tracerCoords.current[i] = { x: -10000, y: -10000 };
+            } else {
+                tracerDrawCount.current = 0;
+                for (let i = 0; i < cnst.tracerCount * drawEvery + 1; i += drawEvery) {
+                    tracerCoords.current[i].x = -10000;
+                    tracerCoords.current[i].y = -10000;
                 }
             }
 
@@ -354,8 +365,8 @@ function App() {
                 drawBoomTracers.current = true;
         //    } else {
         //        drawAntiboomTracers.current = true;
-        //    }
-        }, 1000);
+            //    }
+        }, cnst.tracerDrawDelay);
     }
 
     function handleMouseRelease() {

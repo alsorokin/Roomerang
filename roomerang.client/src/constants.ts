@@ -7,6 +7,8 @@ const constants = {
     fieldHeight: 675,
     renderInterval: 15,
     tracerCount: 35,
+    tracerDrawDelay: 500,
+    tracerDrawEvery: 5,
     momentumCoefficient: 0, // reassigned below
     boomerangInitialY: 0, // reassigned below
     antiboomerangInitialY: 0, // reassigned below
