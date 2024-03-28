@@ -106,7 +106,7 @@ function App() {
         setBallStyle(newBallStyle);
 
         // Set initial tracer coords
-        for (let i = 0; i < cnst.tracerCount * cnst.tracerDrawEvery; i += cnst.tracerDrawEvery) {
+        for (let i = 0; i < cnst.visibleTracerCount * cnst.tracerDrawEvery; i++) {
             tracerCoords.current[i] = { x: -10000, y: -10000 };
         }
 
@@ -163,7 +163,7 @@ function App() {
             // predict next position of the boomerang and draw tracers there
             const drawEvery = 5;
             if (drawBoomTracers.current && !boomerangLaunched.current) {
-                if (tracerDrawCount.current < cnst.tracerCount) {
+                if (tracerDrawCount.current < cnst.visibleTracerCount) {
                     tracerDrawCount.current += 0.5;
                 }
                 let predictionX = position.current.boomX;
@@ -181,7 +181,7 @@ function App() {
                 }
             } else {
                 tracerDrawCount.current = 0;
-                for (let i = 0; i < cnst.tracerCount * drawEvery + 1; i += drawEvery) {
+                for (let i = 0; i < cnst.visibleTracerCount * drawEvery; i += drawEvery) {
                     tracerCoords.current[i].x = -10000;
                     tracerCoords.current[i].y = -10000;
                 }

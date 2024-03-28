@@ -6,7 +6,7 @@ const constants = {
     fieldWidth: 400,
     fieldHeight: 675,
     renderInterval: 15,
-    tracerCount: 35,
+    visibleTracerCount: 35,
     tracerDrawDelay: 500,
     tracerDrawEvery: 5,
     momentumCoefficient: 0, // reassigned below
