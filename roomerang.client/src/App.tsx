@@ -9,6 +9,13 @@ interface Coords {
     y: number;
 }
 
+interface FloatingScore {
+    coords: Coords;
+    score: string;
+    opacity: number;
+    color: string;
+}
+
 const initialBoomerangStyle: CSSProperties = { left: '', top: '', animationPlayState: "paused", visibility: 'visible' };
 
 function App() {
@@ -56,6 +63,7 @@ function App() {
     const paused = useRef(false);
     const lastBallMove = useRef(0);
     const tracerDrawCount = useRef(0);
+    const floatingScores = useRef<FloatingScore[]>([]);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -235,10 +243,14 @@ function App() {
                 };
             }
 
+            // Update floating scores
+            updateFloatingScores();
+
             // Check for apple collision
             if (boomerangIncapacityRemaining.current <= 0) {
                 const boomDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.appleX, position.current.appleY);
                 if (boomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
+                    addFloatingScore(position.current.appleX, position.current.appleY, 2, "blue");
                     resetApple();
                     score.current += 2;
                     setScoreText((score.current).toString());
@@ -248,6 +260,7 @@ function App() {
             if (antiboomerangIncapacityRemaining.current <= 0) {
                 const antiboomDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.appleX, position.current.appleY);
                 if (antiboomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
+                    addFloatingScore(position.current.appleX, position.current.appleY, 2, "red");
                     resetApple();
                     antiscore.current += 2;
                     setAntiscoreText((antiscore.current).toString());
@@ -258,12 +271,14 @@ function App() {
             const boomBallDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.ballX, position.current.ballY);
             const antiboomBallDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.ballX, position.current.ballY);
             if (boomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
+                addFloatingScore(position.current.ballX, position.current.ballY, -3, "blue");
                 startMovingBall();
                 resetBoomerang();
                 score.current -= 3;
                 setScoreText(score.current.toString());
                 boomerangIncapacityRemaining.current = cnst.incapacityDuration;
             } else if (antiboomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
+                addFloatingScore(position.current.ballX, position.current.ballY, -3, "red");
                 startMovingBall();
                 resetAntiboomerang();
                 antiscore.current -= 3;
@@ -336,6 +351,26 @@ function App() {
                 animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
             };
             setBallStyle(newBallStyle);
+        }
+
+        function addFloatingScore(x: number, y: number, score: number, color: string) {
+            const scoreText = score > 0 ? '+' + score : score.toString();
+            floatingScores.current.push({
+                coords: { x: x - 17, y: y - 23 },
+                score: scoreText,
+                opacity: 1,
+                color: color,
+            });
+        }
+
+        function updateFloatingScores() {
+            for (let i = floatingScores.current.length - 1; i >= 0; i--) {
+                floatingScores.current[i].coords.y -= 1;
+                floatingScores.current[i].opacity -= 0.01;
+                if (floatingScores.current[i].opacity >= 1) {
+                    floatingScores.current.splice(i, 1);
+                }
+            }
         }
 
         return () => {
@@ -418,6 +453,17 @@ function App() {
                     <img key="apple" ref={apple} className="apple" src="src/assets/apple_green_28.png" style={appleStyle} />
                     <img key="apple-next" ref={appleNext} className="apple next" src="src/assets/apple_green_28.png" style={appleNextStyle} />
                     <img key="ball" ref={ball} className="ball" src="src/assets/ball_42.png" style={ballStyle} />
+                    {
+                        floatingScores.current.map((fs, index) =>
+                            <div key={`floating-score-${index}`} className="score"
+                                style={{
+                                    top: fs.coords.y + "px",
+                                    left: fs.coords.x + "px",
+                                    opacity: fs.opacity,
+                                    color: fs.color,
+                                }}>{fs.score}</div>
+                        )
+                    }
                 </div>
                 <input type="button" className="btn pause" value={paused.current ? "Unpause" : "Pause"} onClick={() => paused.current ? unpauseGame() : pauseGame()} />
             </div>
