@@ -35,10 +35,13 @@
            with:
              node-version: 20
              cache: 'npm'
+             working-directory: './roomerang.client'
          - name: Install dependencies
            run: npm ci
+           working-directory: './roomerang.client'
          - name: Build
            run: npm run build
+           working-directory: './roomerang.client'
          - name: Setup Pages
            uses: actions/configure-pages@v4
          - name: Upload artifact
@@ -46,6 +49,7 @@
            with:
              # Upload dist folder
              path: './dist'
+             working-directory: './roomerang.client'
          - name: Deploy to GitHub Pages
            id: deployment
            uses: actions/deploy-pages@v4
