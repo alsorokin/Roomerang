@@ -3,6 +3,12 @@ import './App.css';
 import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY } from './helpers';
 import cnst from './constants';
 import ai from './ai';
+import boomerangImg from './assets/boom_bot_42.png';
+import antiboomerangImg from './assets/boom_top_42.png';
+import appleImg from './assets/apple_green_28.png';
+import appleNextImg from './assets/apple_green_28.png';
+import ballImg from './assets/ball_42.png';
+import tracerImg from './assets/tracer_10.png';
 
 interface Coords {
     x: number;
@@ -443,19 +449,24 @@ function App() {
                 <div className="field" onClick={handleFieldClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseRelease}>
                     {
                         tracerCoords.current.map((coords, index) =>
-                            <img key={`tracer-${index}`} className="tracer" style={{ left: coords ? coords.x - 5 + 'px' : '', top: coords ? coords.y - 5 + 'px' : '' }} src="src/assets/tracer_10.png" />
+                            <img key={`tracer-${index}`}
+                                className="tracer"
+                                style={{ left: coords ? coords.x - 5 + 'px' : '', top: coords ? coords.y - 5 + 'px' : '' }}
+                                src={tracerImg} />
                         )
                     }
                     <div key="score-bottom" className="score bottom">{scoreText}</div>
                     <div key="score-top" className="score top">{antiscoreText}</div>
-                    <img key="boomerang" ref={boom} className="boom bottom" src="src/assets/boom_bot_42.png" style={boomerangStyle} />
-                    <img key="antiboomerang" ref={antiboom} className="boom top" src="src/assets/boom_top_42.png" style={antiboomerangStyle} />
-                    <img key="apple" ref={apple} className="apple" src="src/assets/apple_green_28.png" style={appleStyle} />
-                    <img key="apple-next" ref={appleNext} className="apple next" src="src/assets/apple_green_28.png" style={appleNextStyle} />
-                    <img key="ball" ref={ball} className="ball" src="src/assets/ball_42.png" style={ballStyle} />
+                    <img key="boomerang" ref={boom} className="boom bottom" src={boomerangImg} style={boomerangStyle} />
+                    <img key="antiboomerang" ref={antiboom} className="boom top" src={antiboomerangImg} style={antiboomerangStyle} />
+                    <img key="apple" ref={apple} className="apple" src={appleImg} style={appleStyle} />
+                    <img key="apple-next" ref={appleNext} className="apple next" src={appleNextImg} style={appleNextStyle} />
+                    <img key="ball" ref={ball} className="ball" src={ballImg} style={ballStyle} />
                     {
+                        // TODO: do not use index as key
                         floatingScores.current.map((fs, index) =>
-                            <div key={`floating-score-${index}`} className="score"
+                            <div key={`floating-score-${index}`}
+                                className="score"
                                 style={{
                                     top: fs.coords.y + "px",
                                     left: fs.coords.x + "px",
