@@ -25,21 +25,19 @@ jobs:
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
 
-    - name: Increment Patch Version and Create Tag
+    - name: Increment Patch Version
       working-directory: ./roomerang.client
       run: |
-        npm version patch -m "ci: Increment version to %s"
-        # npm version command updates the package.json, package-lock.json, and creates a git tag automatically
+        npm version patch -m "ci: Increment version to %s" --no-git-tag-version
 
-    - name: Debugging Git State
+    - name: Push changes
       run: |
-        git status
-        git log --oneline -n 5
-        git tag
-
-    - name: Push Changes and Tags
-      run: |
+        git add roomerang.client/package.json roomerang.client/package-lock.json
+        git commit -m "ci: Increment version to $(node -p -e "require('./roomerang.client/package.json').version")"
+        git tag -a "v$(node -p -e "require('./roomerang.client/package.json').version")" -m "ci: Tag version $(node -p -e "require('./roomerang.client/package.json').version")"
         git push --follow-tags
-        # This pushes commits and the tags associated with them
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GIT_COMMITTER_NAME: github-actions
+        GIT_COMMITTER_EMAIL: github-actions@github.com
+        GIT_AUTHOR_NAME: github-actions
+        GIT_AUTHOR_EMAIL: github-actions@github.com
