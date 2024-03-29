@@ -13,14 +13,24 @@ jobs:
       with:
         fetch-depth: 0  # Ensures history is checked out
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
+    - name: Set up Node
+      uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: './roomerang.client/package-lock.json'
 
-    - name: Increment Patch Version
+    - name: Configure Git
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
+
+    - name: Increment Patch Version and Create Tag
+      run: |
         npm version patch -m "ci: Increment version to %s"
-        git push
+        # npm version command updates the package.json, package-lock.json, and creates a git tag automatically
+
+    - name: Push Changes and Tags
+      run: |
+        git push --follow-tags
+        # This pushes commits and the tags associated with them

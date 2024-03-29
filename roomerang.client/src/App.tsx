@@ -446,6 +446,7 @@ function App() {
     return (
         <div className="fieldContainer">
             <div className="gameWindow">
+                <div className="gameVersion">v0.1.0</div>
                 <div className="field" onClick={handleFieldClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseRelease}>
                     {
                         tracerCoords.current.map((coords, index) =>

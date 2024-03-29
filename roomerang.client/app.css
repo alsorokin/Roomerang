@@ -114,3 +114,10 @@
         transform: rotate(359deg);
     }
 }
+
+.gameVersion {
+    position: absolute;
+    font-size: 10px;
+    left: 95%;
+    top: 98%;
+}
