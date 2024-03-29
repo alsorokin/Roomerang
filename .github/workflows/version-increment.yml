@@ -26,6 +26,7 @@ jobs:
         git config --global user.email 'github-actions@github.com'
 
     - name: Increment Patch Version and Create Tag
+      working-directory: ./roomerang.client
       run: |
         npm version patch -m "ci: Increment version to %s"
         # npm version command updates the package.json, package-lock.json, and creates a git tag automatically
