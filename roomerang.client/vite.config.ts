@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
 import { env } from 'process';
+import { version } from './package.json';
 
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
@@ -54,5 +55,8 @@ export default defineConfig({
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),
         }
-    }
+    },
+    define: {
+        'process.env.VERSION': JSON.stringify(version),
+    },
 })
