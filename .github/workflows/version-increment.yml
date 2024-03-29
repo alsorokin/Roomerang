@@ -35,3 +35,5 @@ jobs:
       run: |
         git push --follow-tags
         # This pushes commits and the tags associated with them
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
