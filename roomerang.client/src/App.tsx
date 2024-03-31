@@ -242,11 +242,20 @@ function App() {
                     animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
                 };
                 setBallStyle(newBallStyle);
-            } else {
+            } else if (ticks.current - lastBallMove.current > cnst.ballMovementInterval) {
                 // if ball is not moving, check if it's time to move it
-                if (ticks.current - lastBallMove.current > cnst.ballMovementInterval) {
-                    startMovingBall();
+                startMovingBall();
+            } else if (ticks.current - lastBallMove.current > cnst.ballRumbleStartTime) {
+                // if ball is not moving, check if it's time to rumble
+                const rumbleX = Math.random() * 2 - 1;
+                const rumbleY = Math.random() * 2 - 1;
+                const newBallStyle = {
+                    left: position.current.ballX - cnst.ballDiameter / 2 + rumbleX + 'px',
+                    top: position.current.ballY - cnst.ballDiameter / 2 + rumbleY + 'px',
+                    animationPlayState: 'paused',
+                    animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
                 };
+                setBallStyle(newBallStyle);
             }
 
             // Update floating scores
