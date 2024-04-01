@@ -5,8 +5,8 @@ import cnst from './constants';
 import ai from './ai';
 
 // import image assets
-import boomerangImg from './assets/boom_bot_42.png';
-import antiboomerangImg from './assets/boom_top_42.png';
+import boomerangImg from './assets/Bum3.2_42.png';
+import antiboomerangImg from './assets/Bum3.1_42.png';
 import appleImg from './assets/apple_green_28.png';
 import appleNextImg from './assets/apple_green_28.png';
 import ballImg from './assets/ball_42.png';
@@ -14,9 +14,9 @@ import tracerImg from './assets/tracer_10.png';
 
 // import sound assets
 import explosionSound from './assets/sound/explosion.wav';
-import boomerangSound from './assets/sound/jump_2.wav';
-import antiboomerangSound from './assets/sound/jump_1.wav';
-import boomAppleSound from './assets/sound/pickupCoin.wav';
+import boomerangSound from './assets/sound/jump_m_2.wav';
+import antiboomerangSound from './assets/sound/jump_m_1.wav';
+import boomAppleSound from './assets/sound/coin_m.wav';
 import antiboomAppleSound from './assets/sound/synth.wav';
 
 interface Coords {
