@@ -504,7 +504,13 @@ function App() {
         <div className="fieldContainer">
             <div className="gameWindow">
                 <div className="gameVersion">{process.env.VERSION}</div>
-                <div className="field" onClick={handleFieldClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseRelease}>
+                <div className="field"
+                    onClick={handleFieldClick}
+                    onMouseDown={handleMouseDown}
+                    onTouchStart={handleMouseDown}
+                    onMouseUp={handleMouseRelease}
+                    onTouchEnd={handleMouseRelease}
+                >
                     <img key="field" className="fieldImg" src={fieldImg} />
                     <img key="border-long" className="border-long" src={borderLongImg} />
                     {
