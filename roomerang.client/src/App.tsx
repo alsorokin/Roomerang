@@ -3,12 +3,21 @@ import './App.css';
 import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY } from './helpers';
 import cnst from './constants';
 import ai from './ai';
+
+// import image assets
 import boomerangImg from './assets/boom_bot_42.png';
 import antiboomerangImg from './assets/boom_top_42.png';
 import appleImg from './assets/apple_green_28.png';
 import appleNextImg from './assets/apple_green_28.png';
 import ballImg from './assets/ball_42.png';
 import tracerImg from './assets/tracer_10.png';
+
+// import sound assets
+import explosionSound from './assets/sound/explosion.wav';
+import boomerangSound from './assets/sound/jump_2.wav';
+import antiboomerangSound from './assets/sound/jump_1.wav';
+import boomAppleSound from './assets/sound/pickupCoin.wav';
+import antiboomAppleSound from './assets/sound/synth.wav';
 
 interface Coords {
     x: number;
@@ -149,6 +158,9 @@ function App() {
                 if (shouldLaunchAntiboomerang) {
                     antiboomerangLaunched.current = true;
                     lastAiCheck.current += 7000; // postpone next AI check
+                    // play sound
+                    const audio = new Audio(antiboomerangSound);
+                    audio.play();
                 }
             }
 
@@ -269,6 +281,9 @@ function App() {
                     resetApple();
                     score.current += 2;
                     setScoreText((score.current).toString());
+                    // play sound
+                    const audio = new Audio(boomAppleSound);
+                    audio.play();
                 }
             }
 
@@ -279,6 +294,9 @@ function App() {
                     resetApple();
                     antiscore.current += 2;
                     setAntiscoreText((antiscore.current).toString());
+                    // play sound
+                    const audio = new Audio(antiboomAppleSound);
+                    audio.play();
                 }
             }
 
@@ -292,6 +310,9 @@ function App() {
                 score.current -= 3;
                 setScoreText(score.current.toString());
                 boomerangIncapacityRemaining.current = cnst.incapacityDuration;
+                // play sound
+                const audio = new Audio(explosionSound);
+                audio.play();
             } else if (antiboomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
                 addFloatingScore(position.current.ballX, position.current.ballY, -3, "red");
                 startMovingBall();
@@ -299,6 +320,9 @@ function App() {
                 antiscore.current -= 3;
                 setAntiscoreText(antiscore.current.toString());
                 antiboomerangIncapacityRemaining.current = cnst.incapacityDuration;
+                // play sound
+                const audio = new Audio(explosionSound);
+                audio.play();
             }
 
             function resetApple() {
@@ -400,6 +424,9 @@ function App() {
         // if (clickYRelative > fieldHeight / 2) {
         if (!boomerangLaunched.current && boomerangIncapacityRemaining.current <= 0) {
             boomerangLaunched.current = true;
+            // play sound
+            const audio = new Audio(boomerangSound);
+            audio.play();
         }
         // } else {
         //    antiboomerangLaunched.current = true;
