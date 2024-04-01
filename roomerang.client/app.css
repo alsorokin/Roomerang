@@ -67,7 +67,7 @@
 .score {
     position: absolute;
     font-size: 24px;
-    text-shadow: 1px 1px 2px #000;
+    text-shadow: 1px 1px 2px grey;
 }
 
 .score.top {
@@ -83,7 +83,7 @@
     top: 633px;
     text-align: right;
     width: 390px;
-    color: darkgreen;
+    color: mediumpurple;
 }
 
 .tracer {
@@ -136,7 +136,7 @@
     height: 675px;
     left: 0px;
     top: 0px;
-    visibility: hidden;
+    visibility: visible;
 }
 
 @keyframes fadeOut {

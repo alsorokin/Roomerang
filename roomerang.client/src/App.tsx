@@ -6,15 +6,17 @@ import ai from './ai';
 
 // import image assets
 // import boomerangImg from './assets/Bum3.2_42.png';
-import boomerangImg from './assets/cyber/Cyber_bumerang1.png';
-import antiboomerangImg from './assets/Bum3.1_42.png';
+// import boomerangImg from './assets/cyber/Cyber_bumerang1.png';
+import boomerangImg from './assets/night/Cyber_bumerang5_5.png';
+// import antiboomerangImg from './assets/Bum3.1_42.png';
+import antiboomerangImg from './assets/night/Cyber_bumerang3_3.png';
 // import appleImg from './assets/apple_green_28.png';
 import appleImg from './assets/cyber/Cyber_cristal1.png';
 import appleNextImg from './assets/apple_green_28.png';
 // import ballImg from './assets/ball_42.png';
 import ballImg from './assets/cyber/Cyber_Butterfl1y.png';
 import tracerImg from './assets/tracer_10.png';
-import fieldImg from './assets/cyber/wall_cyber_SeaBlue1.png';
+import fieldImg from './assets/night/wall_cyber_NightSky.png';
 import borderLongImg from './assets/cyber/canva_cyber_SeaBlue2_Long.png';
 
 // import sound assets
@@ -293,7 +295,7 @@ function App() {
                 if (boomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
                     const scoreToAdd = getScoreGain(boomerangCombo.current);
                     addFloatingScore(position.current.appleX, position.current.appleY,
-                        scoreToAdd, "darkgreen", boomerangCombo.current);
+                        scoreToAdd, "mediumpurple", boomerangCombo.current);
                     if (boomerangLaunched.current) {
                         boomerangCombo.current++;
                     }
@@ -328,7 +330,7 @@ function App() {
             const boomBallDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.ballX, position.current.ballY);
             const antiboomBallDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.ballX, position.current.ballY);
             if (boomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
-                addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "darkgreen", 3);
+                addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "mediumpurple", 3);
                 startMovingBall();
                 resetBoomerang();
                 score.current -= cnst.ballHitPenalty;
