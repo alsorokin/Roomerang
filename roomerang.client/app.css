@@ -36,6 +36,7 @@
     animation-iteration-count: infinite;
     animation-name: rotation;
     animation-duration: 2s;
+    animation-fill-mode: both;
     width: 42px;
     height: 42px;
 }
@@ -49,7 +50,7 @@
 
 .field {
     position: absolute;
-    background-color: #a4b37f;
+    background-color: #bdaae6;
     width: 400px;
     height: 675px;
     left: 100px;
@@ -82,7 +83,7 @@
     top: 633px;
     text-align: right;
     width: 390px;
-    color: blue;
+    color: darkgreen;
 }
 
 .tracer {
@@ -120,4 +121,40 @@
     font-size: 10px;
     left: 95%;
     top: 98%;
+}
+
+.border-long {
+    position: absolute;
+    top: 0px;
+    left: -16px;
+    visibility: hidden;
+}
+
+.fieldImg {
+    position: absolute;
+    width: 400px;
+    height: 675px;
+    left: 0px;
+    top: 0px;
+    visibility: hidden;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        margin-bottom: 0px;
+    }
+
+    to {
+        opacity: 0;
+        margin-bottom: 500px;
+    }
+}
+
+.fading {
+    position: absolute;
+    animation: fadeOut 1s;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-fill-mode: both;
 }

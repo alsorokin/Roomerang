@@ -1,21 +1,26 @@
 import { useRef, useEffect, useState, CSSProperties } from 'react';
 import './App.css';
-import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY } from './helpers';
+import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY, getScoreGain } from './helpers';
 import cnst from './constants';
 import ai from './ai';
 
 // import image assets
-import boomerangImg from './assets/Bum3.2_42.png';
+// import boomerangImg from './assets/Bum3.2_42.png';
+import boomerangImg from './assets/cyber/Cyber_bumerang1.png';
 import antiboomerangImg from './assets/Bum3.1_42.png';
-import appleImg from './assets/apple_green_28.png';
+// import appleImg from './assets/apple_green_28.png';
+import appleImg from './assets/cyber/Cyber_cristal1.png';
 import appleNextImg from './assets/apple_green_28.png';
-import ballImg from './assets/ball_42.png';
+// import ballImg from './assets/ball_42.png';
+import ballImg from './assets/cyber/Cyber_Butterfl1y.png';
 import tracerImg from './assets/tracer_10.png';
+import fieldImg from './assets/cyber/wall_cyber_SeaBlue1.png';
+import borderLongImg from './assets/cyber/canva_cyber_SeaBlue2_Long.png';
 
 // import sound assets
 import explosionSound from './assets/sound/explosion.wav';
-import boomerangSound from './assets/sound/jump_m_2.wav';
-import antiboomerangSound from './assets/sound/jump_m_1.wav';
+import boomerangSound from './assets/sound/jump_m_1.wav';
+import antiboomerangSound from './assets/sound/jump_m_2.wav';
 import boomAppleSound from './assets/sound/coin_m.wav';
 import antiboomAppleSound from './assets/sound/synth.wav';
 
@@ -29,6 +34,8 @@ interface FloatingScore {
     score: string;
     opacity: number;
     color: string;
+    textSize: number;
+    id: number;
 }
 
 const initialBoomerangStyle: CSSProperties = { left: '', top: '', animationPlayState: "paused", visibility: 'visible' };
@@ -79,6 +86,9 @@ function App() {
     const lastBallMove = useRef(0);
     const tracerDrawCount = useRef(0);
     const floatingScores = useRef<FloatingScore[]>([]);
+    const boomerangCombo = useRef(1);
+    const antiboomerangCombo = useRef(1);
+    const nextFloatingScoreId = useRef(0);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -171,11 +181,13 @@ function App() {
                 boomerangLaunched.current = false;
                 position.current.boomY = cnst.boomerangInitialY;
                 momentum.current.boomY = 0;
+                boomerangCombo.current = 1;
             }
             else if (boomerangLaunched.current) {
                 momentum.current.boomY = calculateMomentumY(momentum.current.boomY, position.current.boomY);
                 position.current.boomY += momentum.current.boomY;
             }
+
             const boomVisibility = boomerangIncapacityRemaining.current > 0 &&
                 Math.floor(boomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0 ? 'hidden' : 'visible';
             const newBoomerangStyle: CSSProperties = {
@@ -220,11 +232,13 @@ function App() {
                 antiboomerangLaunched.current = false;
                 position.current.antiboomY = cnst.antiboomerangInitialY;
                 momentum.current.antiboomY = 0;
+                antiboomerangCombo.current = 1;
             }
             else if (antiboomerangLaunched.current) {
                 momentum.current.antiboomY = calculateMomentumY(momentum.current.antiboomY, position.current.antiboomY);
                 position.current.antiboomY += momentum.current.antiboomY;
             }
+
             const aboomVisibility = antiboomerangIncapacityRemaining.current > 0 &&
                 Math.floor(antiboomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0 ? 'hidden' : 'visible';
             const newAntiboomerangStyle: CSSProperties = {
@@ -265,7 +279,7 @@ function App() {
                     left: position.current.ballX - cnst.ballDiameter / 2 + rumbleX + 'px',
                     top: position.current.ballY - cnst.ballDiameter / 2 + rumbleY + 'px',
                     animationPlayState: 'paused',
-                    animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
+                    animationDirection: 'normal',
                 };
                 setBallStyle(newBallStyle);
             }
@@ -277,9 +291,14 @@ function App() {
             if (boomerangIncapacityRemaining.current <= 0) {
                 const boomDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.appleX, position.current.appleY);
                 if (boomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
-                    addFloatingScore(position.current.appleX, position.current.appleY, 2, "blue");
+                    const scoreToAdd = getScoreGain(boomerangCombo.current);
+                    addFloatingScore(position.current.appleX, position.current.appleY,
+                        scoreToAdd, "darkgreen", boomerangCombo.current);
+                    if (boomerangLaunched.current) {
+                        boomerangCombo.current++;
+                    }
                     resetApple();
-                    score.current += 2;
+                    score.current += scoreToAdd;
                     setScoreText((score.current).toString());
                     // play sound
                     const audio = new Audio(boomAppleSound);
@@ -290,9 +309,14 @@ function App() {
             if (antiboomerangIncapacityRemaining.current <= 0) {
                 const antiboomDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.appleX, position.current.appleY);
                 if (antiboomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
-                    addFloatingScore(position.current.appleX, position.current.appleY, 2, "red");
+                    const scoreToAdd = getScoreGain(antiboomerangCombo.current);
+                    addFloatingScore(position.current.appleX, position.current.appleY,
+                        scoreToAdd, "red", antiboomerangCombo.current);
+                    if (antiboomerangLaunched.current) {
+                        antiboomerangCombo.current++;
+                    }
                     resetApple();
-                    antiscore.current += 2;
+                    antiscore.current += scoreToAdd;
                     setAntiscoreText((antiscore.current).toString());
                     // play sound
                     const audio = new Audio(antiboomAppleSound);
@@ -304,20 +328,22 @@ function App() {
             const boomBallDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.ballX, position.current.ballY);
             const antiboomBallDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.ballX, position.current.ballY);
             if (boomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
-                addFloatingScore(position.current.ballX, position.current.ballY, -3, "blue");
+                addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "darkgreen", 3);
                 startMovingBall();
                 resetBoomerang();
-                score.current -= 3;
+                score.current -= cnst.ballHitPenalty;
+                boomerangCombo.current = 1;
                 setScoreText(score.current.toString());
                 boomerangIncapacityRemaining.current = cnst.incapacityDuration;
                 // play sound
                 const audio = new Audio(explosionSound);
                 audio.play();
             } else if (antiboomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
-                addFloatingScore(position.current.ballX, position.current.ballY, -3, "red");
+                addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "red", 3);
                 startMovingBall();
                 resetAntiboomerang();
-                antiscore.current -= 3;
+                antiscore.current -= cnst.ballHitPenalty;
+                antiboomerangCombo.current = 1;
                 setAntiscoreText(antiscore.current.toString());
                 antiboomerangIncapacityRemaining.current = cnst.incapacityDuration;
                 // play sound
@@ -392,21 +418,24 @@ function App() {
             setBallStyle(newBallStyle);
         }
 
-        function addFloatingScore(x: number, y: number, score: number, color: string) {
+        function addFloatingScore(x: number, y: number, score: number, color: string, combo: number = 1) {
             const scoreText = score > 0 ? '+' + score : score.toString();
+            const xCorrection = scoreText.length * 3 + combo * 8;
+            const yCorrection = 19 + combo * 8;
             floatingScores.current.push({
-                coords: { x: x - 17, y: y - 23 },
+                coords: { x: x - xCorrection, y: y - yCorrection },
                 score: scoreText,
                 opacity: 1,
                 color: color,
+                textSize: 14 + combo * 8,
+                id: nextFloatingScoreId.current++,
             });
         }
 
         function updateFloatingScores() {
             for (let i = floatingScores.current.length - 1; i >= 0; i--) {
-                floatingScores.current[i].coords.y -= 1;
-                floatingScores.current[i].opacity -= 0.01;
-                if (floatingScores.current[i].opacity >= 1) {
+                floatingScores.current[i].opacity -= 0.005;
+                if (floatingScores.current[i].opacity <= 0) {
                     floatingScores.current.splice(i, 1);
                 }
             }
@@ -418,31 +447,21 @@ function App() {
         };
     }, []);
 
-    function handleFieldClick() { //(event: React.MouseEvent<HTMLDivElement>) {
+    function handleFieldClick() {
         if (paused.current) return;
-        // const clickYRelative = event.clientY - event.currentTarget.getBoundingClientRect().top;
-        // if (clickYRelative > fieldHeight / 2) {
         if (!boomerangLaunched.current && boomerangIncapacityRemaining.current <= 0) {
             boomerangLaunched.current = true;
             // play sound
             const audio = new Audio(boomerangSound);
             audio.play();
         }
-        // } else {
-        //    antiboomerangLaunched.current = true;
-        // }
     }
 
-    function handleMouseDown() { // (event: React.MouseEvent<HTMLDivElement>) {
+    function handleMouseDown() {
         if (paused.current) return;
         clearTimeout(showTracersTimeout.current);
-        // const clickYRelative = event.clientY - event.currentTarget.getBoundingClientRect().top;
         showTracersTimeout.current = setTimeout(() => {
-        //    if (clickYRelative > cnst.fieldHeight / 2) {
                 drawBoomTracers.current = true;
-        //    } else {
-        //        drawAntiboomTracers.current = true;
-            //    }
         }, cnst.tracerDrawDelay);
     }
 
@@ -484,11 +503,13 @@ function App() {
             <div className="gameWindow">
                 <div className="gameVersion">{process.env.VERSION}</div>
                 <div className="field" onClick={handleFieldClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseRelease}>
+                    <img key="field" className="fieldImg" src={fieldImg} />
+                    <img key="border-long" className="border-long" src={borderLongImg} />
                     {
                         tracerCoords.current.map((coords, index) =>
                             <img key={`tracer-${index}`}
                                 className="tracer"
-                                style={{ left: coords ? coords.x - 5 + 'px' : '', top: coords ? coords.y - 5 + 'px' : '' }}
+                                style={{ left: coords ? coords.x + 'px' : '', top: coords ? coords.y + 'px' : '' }}
                                 src={tracerImg} />
                         )
                     }
@@ -500,15 +521,14 @@ function App() {
                     <img key="apple-next" ref={appleNext} className="apple next" src={appleNextImg} style={appleNextStyle} />
                     <img key="ball" ref={ball} className="ball" src={ballImg} style={ballStyle} />
                     {
-                        // TODO: do not use index as key
-                        floatingScores.current.map((fs, index) =>
-                            <div key={`floating-score-${index}`}
-                                className="score"
+                        floatingScores.current.map((fs) =>
+                            <div key={`floating-score-${fs.id}`}
+                                className="score fading"
                                 style={{
                                     top: fs.coords.y + "px",
                                     left: fs.coords.x + "px",
-                                    opacity: fs.opacity,
                                     color: fs.color,
+                                    fontSize: fs.textSize + "px",
                                 }}>{fs.score}</div>
                         )
                     }

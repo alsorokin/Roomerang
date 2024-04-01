@@ -16,3 +16,7 @@ export function calculateMomentumX(currentMomentum: number, currentPosition: num
 export function calculateMomentumY(currentMomentum: number, currentPosition: number) {
     return currentMomentum - (currentPosition - cnst.fieldHeight / 2) / cnst.momentumCoefficient;
 }
+
+export function getScoreGain(combo: number) {
+    return Math.pow(cnst.baseScoreGain, combo);
+}

@@ -13,6 +13,8 @@ const constants = {
     ballMovementInterval: 15000,
     incapacityDuration: 3000,
     incapacityBlinkInterval: 150,
+    baseScoreGain: 2,
+    ballHitPenalty: 5,
     momentumCoefficient: 0, // reassigned below
     boomerangInitialY: 0, // reassigned below
     antiboomerangInitialY: 0, // reassigned below
