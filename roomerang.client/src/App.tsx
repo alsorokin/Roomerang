@@ -625,10 +625,34 @@ function App() {
                         )
                     }
                 </div>
-                <input type="button" key="pauseButton" className="btn pause" value={paused.current ? "Unpause" : "Pause"} onClick={() => paused.current ? unpauseGame() : pauseGame()} />
-                <input type="button" key="aboomToggleButton" className="btn aboomToggle" value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"} onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang()} />
-                <input type="button" key="ballToggleButton" className="btn ballToggle" value={ballEnabled.current ? "Disable ball" : "Enable ball"} onClick={() => ballEnabled.current ? disableBall() : enableBall()} />
-                <input type="button" key="soundToggleButton" className="btn soundToggle" value={soundEnabled.current ? "Disable sound" : "Enable sound"} onClick={() => soundEnabled.current = !soundEnabled.current} />
+                <input
+                    type="button"
+                    key="pauseButton"
+                    className={paused.current ? "btn pause red" : "btn pause green"}
+                    value={paused.current ? "Unpause" : "Pause"}
+                    onClick={() => paused.current ? unpauseGame() : pauseGame()}
+                />
+                <input
+                    type="button"
+                    key="aboomToggleButton"
+                    className={antiboomEnabled.current ? "btn aboomToggle green" : "btn aboomToggle red"}
+                    value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"}
+                    onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang()}
+                />
+                <input
+                    type="button"
+                    key="ballToggleButton"
+                    className={ballEnabled.current ? "btn ballToggle green" : "btn ballToggle red"}
+                    value={ballEnabled.current ? "Disable ball" : "Enable ball"}
+                    onClick={() => ballEnabled.current ? disableBall() : enableBall()}
+                />
+                <input
+                    type="button"
+                    key="soundToggleButton"
+                    className={soundEnabled.current ? "btn soundToggle green" : "btn soundToggle red"}
+                    value={soundEnabled.current ? "Disable sound" : "Enable sound"}
+                    onClick={() => soundEnabled.current = !soundEnabled.current}
+                />
             </div>
         </div>
     );
