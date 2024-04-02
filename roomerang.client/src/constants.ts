@@ -10,7 +10,7 @@ const constants = {
     tracerDrawDelay: 500,
     tracerDrawEvery: 5,
     aiCheckInterval: 780,
-    ballMovementInterval: 15000,
+    ballMovementInterval: 9000,
     incapacityDuration: 3000,
     incapacityBlinkInterval: 150,
     baseScoreGain: 2,

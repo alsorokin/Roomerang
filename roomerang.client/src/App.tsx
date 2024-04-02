@@ -98,6 +98,8 @@ function App() {
     const antiboomerangCombo = useRef(1);
     const nextFloatingScoreId = useRef(0);
     const antiboomEnabled = useRef(false);
+    const ballEnabled = useRef(false);
+    const soundEnabled = useRef(true);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -142,11 +144,12 @@ function App() {
         // Set initial ball position
         position.current.ballX = cnst.fieldWidth / 2;
         position.current.ballY = cnst.fieldHeight / 2;
-        const newBallStyle = {
+        const newBallStyle: CSSProperties = {
             left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
             top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
             animationPlayState: 'paused',
             animationDirection: 'normal',
+            visibility: 'hidden',
         };
         setBallStyle(newBallStyle);
 
@@ -185,8 +188,10 @@ function App() {
                     antiboomerangLaunched.current = true;
                     lastAiCheck.current += 7000; // postpone next AI check
                     // play sound
-                    const audio = new Audio(antiboomerangSound);
-                    audio.play();
+                    if (soundEnabled.current) {
+                        const audio = new Audio(antiboomerangSound);
+                        audio.play();
+                    }
                 }
             }
 
@@ -271,38 +276,40 @@ function App() {
             setAntiboomerangStyle(newAntiboomerangStyle);
 
             // Move ball
-            if (ballMoving.current) {
-                // first, check if ball is close to the target
-                const distance = distanceBetweenPoints(position.current.ballX, position.current.ballY, position.current.ballNextX, position.current.ballNextY);
-                if (distance < 3) {
-                    ballMoving.current = false;
-                    momentum.current.ballX = 0;
-                    momentum.current.ballY = 0;
-                    lastBallMove.current = ticks.current;
+            if (ballEnabled.current) {
+                if (ballMoving.current) {
+                    // first, check if ball is close to the target
+                    const distance = distanceBetweenPoints(position.current.ballX, position.current.ballY, position.current.ballNextX, position.current.ballNextY);
+                    if (distance < 3) {
+                        ballMoving.current = false;
+                        momentum.current.ballX = 0;
+                        momentum.current.ballY = 0;
+                        lastBallMove.current = ticks.current;
+                    }
+                    position.current.ballX = position.current.ballX + momentum.current.ballX;
+                    position.current.ballY = position.current.ballY + momentum.current.ballY;
+                    const newBallStyle = {
+                        left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
+                        top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
+                        animationPlayState: ballMoving.current ? 'running' : 'paused',
+                        animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
+                    };
+                    setBallStyle(newBallStyle);
+                } else if (ticks.current - lastBallMove.current > cnst.ballMovementInterval) {
+                    // if ball is not moving, check if it's time to move it
+                    startMovingBall();
+                } else if (ticks.current - lastBallMove.current > cnst.ballRumbleStartTime) {
+                    // if ball is not moving, check if it's time to rumble
+                    const rumbleX = Math.random() * 2 - 1;
+                    const rumbleY = Math.random() * 2 - 1;
+                    const newBallStyle = {
+                        left: position.current.ballX - cnst.ballDiameter / 2 + rumbleX + 'px',
+                        top: position.current.ballY - cnst.ballDiameter / 2 + rumbleY + 'px',
+                        animationPlayState: 'paused',
+                        animationDirection: 'normal',
+                    };
+                    setBallStyle(newBallStyle);
                 }
-                position.current.ballX = position.current.ballX + momentum.current.ballX;
-                position.current.ballY = position.current.ballY + momentum.current.ballY;
-                const newBallStyle = {
-                    left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
-                    top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
-                    animationPlayState: ballMoving.current ? 'running' : 'paused',
-                    animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
-                };
-                setBallStyle(newBallStyle);
-            } else if (ticks.current - lastBallMove.current > cnst.ballMovementInterval) {
-                // if ball is not moving, check if it's time to move it
-                startMovingBall();
-            } else if (ticks.current - lastBallMove.current > cnst.ballRumbleStartTime) {
-                // if ball is not moving, check if it's time to rumble
-                const rumbleX = Math.random() * 2 - 1;
-                const rumbleY = Math.random() * 2 - 1;
-                const newBallStyle = {
-                    left: position.current.ballX - cnst.ballDiameter / 2 + rumbleX + 'px',
-                    top: position.current.ballY - cnst.ballDiameter / 2 + rumbleY + 'px',
-                    animationPlayState: 'paused',
-                    animationDirection: 'normal',
-                };
-                setBallStyle(newBallStyle);
             }
 
             // Update floating scores
@@ -322,8 +329,10 @@ function App() {
                     score.current += scoreToAdd;
                     setScoreText((score.current).toString());
                     // play sound
-                    const audio = new Audio(boomAppleSound);
-                    audio.play();
+                    if (soundEnabled.current) {
+                        const audio = new Audio(boomAppleSound);
+                        audio.play();
+                    }
                 }
             }
 
@@ -340,41 +349,48 @@ function App() {
                     antiscore.current += scoreToAdd;
                     setAntiscoreText((antiscore.current).toString());
                     // play sound
-                    const audio = new Audio(antiboomAppleSound);
-                    audio.play();
+                    if (soundEnabled.current) {
+                        const audio = new Audio(antiboomAppleSound);
+                        audio.play();
+                    }
                 }
             }
 
             // Check for ball collision
-            const boomBallDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.ballX, position.current.ballY);
-            if (boomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
-                addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "mediumpurple", 3);
-                startMovingBall();
-                resetBoomerang();
-                score.current -= cnst.ballHitPenalty;
-                boomerangCombo.current = 1;
-                setScoreText(score.current.toString());
-                boomerangIncapacityRemaining.current = cnst.incapacityDuration;
-                // play sound
-                const audio = new Audio(explosionSound);
-                audio.play();
-            } else if (antiboomEnabled.current &&
-                distanceBetweenPoints(
-                    position.current.antiboomX,
-                    position.current.antiboomY,
-                    position.current.ballX,
-                    position.current.ballY) < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2)
-            {
-                addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "red", 3);
-                startMovingBall();
-                resetAntiboomerang();
-                antiscore.current -= cnst.ballHitPenalty;
-                antiboomerangCombo.current = 1;
-                setAntiscoreText(antiscore.current.toString());
-                antiboomerangIncapacityRemaining.current = cnst.incapacityDuration;
-                // play sound
-                const audio = new Audio(explosionSound);
-                audio.play();
+            if (ballEnabled.current) {
+                const boomBallDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.ballX, position.current.ballY);
+                if (boomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
+                    addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "mediumpurple", 3);
+                    startMovingBall();
+                    resetBoomerang();
+                    score.current -= cnst.ballHitPenalty;
+                    boomerangCombo.current = 1;
+                    setScoreText(score.current.toString());
+                    boomerangIncapacityRemaining.current = cnst.incapacityDuration;
+                    // play sound
+                    if (soundEnabled.current) {
+                        const audio = new Audio(explosionSound);
+                        audio.play();
+                    }
+                } else if (antiboomEnabled.current &&
+                    distanceBetweenPoints(
+                        position.current.antiboomX,
+                        position.current.antiboomY,
+                        position.current.ballX,
+                        position.current.ballY) < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
+                    addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "red", 3);
+                    startMovingBall();
+                    resetAntiboomerang();
+                    antiscore.current -= cnst.ballHitPenalty;
+                    antiboomerangCombo.current = 1;
+                    setAntiscoreText(antiscore.current.toString());
+                    antiboomerangIncapacityRemaining.current = cnst.incapacityDuration;
+                    // play sound
+                    if (soundEnabled.current) {
+                        const audio = new Audio(explosionSound);
+                        audio.play();
+                    }
+                }
             }
 
             function resetApple() {
@@ -478,8 +494,10 @@ function App() {
         if (!boomerangLaunched.current && boomerangIncapacityRemaining.current <= 0) {
             boomerangLaunched.current = true;
             // play sound
-            const audio = new Audio(boomerangSound);
-            audio.play();
+            if (soundEnabled.current) {
+                const audio = new Audio(boomerangSound);
+                audio.play();
+            }
         }
     }
 
@@ -511,12 +529,14 @@ function App() {
             top: position.current.antiboomY - cnst.boomerangDiameter / 2,
             left: position.current.antiboomX - cnst.boomerangDiameter / 2,
             animationPlayState: 'paused',
+            visibility: antiboomEnabled.current ? 'visible' : 'hidden',
         };
         setAntiboomerangStyle(newAntiboomerangStyle);
-        const newBallStyle = {
+        const newBallStyle: CSSProperties = {
             top: position.current.ballY - cnst.ballDiameter / 2,
             left: position.current.ballX - cnst.ballDiameter / 2,
             animationPlayState: 'paused',
+            visibility: ballEnabled.current ? 'visible' : 'hidden',
         };
         setBallStyle(newBallStyle);
     }
@@ -536,6 +556,30 @@ function App() {
 
     function disableAntiboomerang() {
         antiboomEnabled.current = false;
+    }
+
+    function enableBall() {
+        ballEnabled.current = true;
+        position.current.ballX = cnst.fieldWidth / 2;
+        position.current.ballY = cnst.fieldHeight / 2;
+        const newBallStyle: CSSProperties = {
+            left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
+            top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
+            animationPlayState: 'paused',
+            animationDirection: 'normal',
+            visibility: 'visible',
+        };
+        setBallStyle(newBallStyle);
+        lastBallMove.current = ticks.current;
+    }
+
+    function disableBall() {
+        ballEnabled.current = false;
+        const newBallStyle: CSSProperties = {
+            animationPlayState: 'paused',
+            visibility: 'hidden',
+        };
+        setBallStyle(newBallStyle);
     }
 
     return (
@@ -581,8 +625,10 @@ function App() {
                         )
                     }
                 </div>
-                <input type="button" className="btn pause" value={paused.current ? "Unpause" : "Pause"} onClick={() => paused.current ? unpauseGame() : pauseGame()} />
-                <input type="button" className="btn aboomToggle" value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"} onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang() } />
+                <input type="button" key="pauseButton" className="btn pause" value={paused.current ? "Unpause" : "Pause"} onClick={() => paused.current ? unpauseGame() : pauseGame()} />
+                <input type="button" key="aboomToggleButton" className="btn aboomToggle" value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"} onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang()} />
+                <input type="button" key="ballToggleButton" className="btn ballToggle" value={ballEnabled.current ? "Disable ball" : "Enable ball"} onClick={() => ballEnabled.current ? disableBall() : enableBall()} />
+                <input type="button" key="soundToggleButton" className="btn soundToggle" value={soundEnabled.current ? "Disable sound" : "Enable sound"} onClick={() => soundEnabled.current = !soundEnabled.current} />
             </div>
         </div>
     );

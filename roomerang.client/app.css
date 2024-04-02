@@ -92,7 +92,7 @@
 
 .btn {
     width: 100px;
-    height: 50px;
+    height: 35px;
     background-color: #4CAF50;
     color: white;
     font-size: 16px;
@@ -100,17 +100,31 @@
     cursor: pointer;
 }
 
+.ballToggle {
+    position: absolute;
+    left: 25px;
+    top: 10px;
+}
+
 .pause {
     position: absolute;
-    left: 125px;
-    top: 743px;
+    left: 140px;
+    top: 10px;
+    width: 90px;
 }
 
 .aboomToggle {
     position: absolute;
-    left: 265px;
-    top: 743px;
-    width: 200px;
+    left: 245px;
+    top: 10px;
+    width: 185px;
+}
+
+.soundToggle {
+    position: absolute;
+    left: 445px;
+    top: 10px;
+    width: 130px;
 }
 
 @keyframes rotation {
