@@ -509,7 +509,7 @@ function App() {
                     onMouseDown={handleMouseDown}
                     onTouchStart={handleMouseDown}
                     onMouseUp={handleMouseRelease}
-                    onTouchEnd={handleMouseRelease}
+                    onTouchEnd={() => { handleMouseRelease(); handleFieldClick(); }}
                 >
                     <img key="field" className="fieldImg" src={fieldImg} />
                     <img key="border-long" className="border-long" src={borderLongImg} />
