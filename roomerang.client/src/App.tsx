@@ -97,6 +97,7 @@ function App() {
     const boomerangCombo = useRef(1);
     const antiboomerangCombo = useRef(1);
     const nextFloatingScoreId = useRef(0);
+    const antiboomEnabled = useRef(false);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -164,7 +165,11 @@ function App() {
             if (antiboomerangIncapacityRemaining.current >= 0) antiboomerangIncapacityRemaining.current -= cnst.renderInterval;
 
             // Ask AI if we should launch antiboomerang
-            if (!antiboomerangLaunched.current && antiboomerangIncapacityRemaining.current <= 0 && ticks.current - lastAiCheck.current > cnst.aiCheckInterval) {
+            if (antiboomEnabled.current &&
+                !antiboomerangLaunched.current &&
+                antiboomerangIncapacityRemaining.current <= 0 &&
+                ticks.current - lastAiCheck.current > cnst.aiCheckInterval)
+            {
                 lastAiCheck.current = ticks.current;
                 const shouldLaunchAntiboomerang = ai(
                     position.current.antiboomX,
@@ -237,27 +242,32 @@ function App() {
             }
 
             // Move antiboomerang
-            momentum.current.antiboomX = calculateMomentumX(momentum.current.antiboomX, position.current.antiboomX);
-            position.current.antiboomX += momentum.current.antiboomX;
-            if (antiboomerangLaunched.current && position.current.antiboomY < cnst.antiboomerangInitialY) {
-                antiboomerangLaunched.current = false;
-                position.current.antiboomY = cnst.antiboomerangInitialY;
-                momentum.current.antiboomY = 0;
-                antiboomerangCombo.current = 1;
-            }
-            else if (antiboomerangLaunched.current) {
-                momentum.current.antiboomY = calculateMomentumY(momentum.current.antiboomY, position.current.antiboomY);
-                position.current.antiboomY += momentum.current.antiboomY;
+            if (antiboomEnabled.current) {
+                momentum.current.antiboomX = calculateMomentumX(momentum.current.antiboomX, position.current.antiboomX);
+                position.current.antiboomX += momentum.current.antiboomX;
+                if (antiboomerangLaunched.current && position.current.antiboomY < cnst.antiboomerangInitialY) {
+                    antiboomerangLaunched.current = false;
+                    position.current.antiboomY = cnst.antiboomerangInitialY;
+                    momentum.current.antiboomY = 0;
+                    antiboomerangCombo.current = 1;
+                }
+                else if (antiboomerangLaunched.current) {
+                    momentum.current.antiboomY = calculateMomentumY(momentum.current.antiboomY, position.current.antiboomY);
+                    position.current.antiboomY += momentum.current.antiboomY;
+                }
             }
 
-            const aboomVisibility = antiboomerangIncapacityRemaining.current > 0 &&
-                Math.floor(antiboomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0 ? 'hidden' : 'visible';
+            const aboomVisibility = !antiboomEnabled.current ||
+                (antiboomerangIncapacityRemaining.current > 0 &&
+                Math.floor(antiboomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0) ?
+                'hidden' : 'visible';
             const newAntiboomerangStyle: CSSProperties = {
                 left: position.current.antiboomX - cnst.boomerangDiameter / 2 + 'px',
                 top: position.current.antiboomY - cnst.boomerangDiameter / 2 + 'px',
                 animationPlayState: antiboomerangLaunched.current ? 'running' : 'paused',
                 visibility: aboomVisibility,
             };
+            // TODO: this might be excessive. only set style when it actually needs to change
             setAntiboomerangStyle(newAntiboomerangStyle);
 
             // Move ball
@@ -317,7 +327,7 @@ function App() {
                 }
             }
 
-            if (antiboomerangIncapacityRemaining.current <= 0) {
+            if (antiboomEnabled.current && antiboomerangIncapacityRemaining.current <= 0) {
                 const antiboomDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.appleX, position.current.appleY);
                 if (antiboomDistance < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
                     const scoreToAdd = getScoreGain(antiboomerangCombo.current);
@@ -337,7 +347,6 @@ function App() {
 
             // Check for ball collision
             const boomBallDistance = distanceBetweenPoints(position.current.boomX, position.current.boomY, position.current.ballX, position.current.ballY);
-            const antiboomBallDistance = distanceBetweenPoints(position.current.antiboomX, position.current.antiboomY, position.current.ballX, position.current.ballY);
             if (boomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
                 addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "mediumpurple", 3);
                 startMovingBall();
@@ -349,7 +358,13 @@ function App() {
                 // play sound
                 const audio = new Audio(explosionSound);
                 audio.play();
-            } else if (antiboomBallDistance < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
+            } else if (antiboomEnabled.current &&
+                distanceBetweenPoints(
+                    position.current.antiboomX,
+                    position.current.antiboomY,
+                    position.current.ballX,
+                    position.current.ballY) < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2)
+            {
                 addFloatingScore(position.current.ballX, position.current.ballY, -cnst.ballHitPenalty, "red", 3);
                 startMovingBall();
                 resetAntiboomerang();
@@ -510,6 +525,19 @@ function App() {
         paused.current = false;
     }
 
+    function enableAntiboomerang() {
+        antiboomEnabled.current = true;
+        position.current.antiboomX = cnst.fieldWidth - position.current.boomX;
+        momentum.current.antiboomX = -momentum.current.boomX;
+        position.current.antiboomY = cnst.antiboomerangInitialY;
+        momentum.current.antiboomY = 0;
+        antiboomerangLaunched.current = false;
+    }
+
+    function disableAntiboomerang() {
+        antiboomEnabled.current = false;
+    }
+
     return (
         <div className="fieldContainer">
             <div className="gameWindow">
@@ -534,7 +562,7 @@ function App() {
                         )
                     }
                     <div key="score-bottom" className="score bottom">{scoreText}</div>
-                    <div key="score-top" className="score top">{antiscoreText}</div>
+                    <div key="score-top" className="score top" style={{ visibility: antiboomEnabled.current ? 'visible' : 'hidden' }}>{antiscoreText}</div>
                     <img key="boomerang" ref={boom} className="boom bottom" src={boomerangImg} style={boomerangStyle} />
                     <img key="antiboomerang" ref={antiboom} className="boom top" src={antiboomerangImg} style={antiboomerangStyle} />
                     <img key="apple" ref={apple} className="apple" src={appleImg} style={appleStyle} />
@@ -554,6 +582,7 @@ function App() {
                     }
                 </div>
                 <input type="button" className="btn pause" value={paused.current ? "Unpause" : "Pause"} onClick={() => paused.current ? unpauseGame() : pauseGame()} />
+                <input type="button" className="btn aboomToggle" value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"} onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang() } />
             </div>
         </div>
     );

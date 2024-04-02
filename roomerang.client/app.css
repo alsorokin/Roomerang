@@ -102,8 +102,15 @@
 
 .pause {
     position: absolute;
-    left: 250px;
+    left: 125px;
     top: 743px;
+}
+
+.aboomToggle {
+    position: absolute;
+    left: 265px;
+    top: 743px;
+    width: 200px;
 }
 
 @keyframes rotation {
