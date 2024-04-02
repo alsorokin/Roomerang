@@ -475,6 +475,11 @@ function App() {
         clearTimeout(showTracersTimeout.current);
     }
 
+    function handleTouchMove(e: React.TouchEvent) {
+        if (paused.current) return;
+        e.preventDefault();
+    }
+
     function pauseGame() {
         paused.current = true;
         const newBoomerangStyle: CSSProperties = {
@@ -511,6 +516,7 @@ function App() {
                     onTouchStart={handleMouseDown}
                     onMouseUp={handleMouseRelease}
                     onTouchEnd={() => { handleMouseRelease(); handleFieldClick(); }}
+                    onTouchMove={handleTouchMove}
                 >
                     <img key="field" className="fieldImg" src={fieldImg} />
                     <img key="border-long" className="border-long" src={borderLongImg} />
