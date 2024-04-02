@@ -7,17 +7,23 @@ import ai from './ai';
 // import image assets
 // import boomerangImg from './assets/Bum3.2_42.png';
 // import boomerangImg from './assets/cyber/Cyber_bumerang1.png';
-import boomerangImg from './assets/night/Cyber_bumerang5_5.png';
+//import boomerangImg from './assets/night/Cyber_bumerang5_5.png';
+import boomerangImg from './assets/cyber2/Cyber_bumerang6.png';
 // import antiboomerangImg from './assets/Bum3.1_42.png';
-import antiboomerangImg from './assets/night/Cyber_bumerang3_3.png';
+// import antiboomerangImg from './assets/night/Cyber_bumerang3_3.png';
+import antiboomerangImg from './assets/cyber2/Cyber_bumerang7.png';
 // import appleImg from './assets/apple_green_28.png';
-import appleImg from './assets/cyber/Cyber_cristal1.png';
+// import appleImg from './assets/cyber/Cyber_cristal1.png';
+import appleImg from './assets/cyber2/Cyber_cristal2.png';
 import appleNextImg from './assets/apple_green_28.png';
 // import ballImg from './assets/ball_42.png';
-import ballImg from './assets/cyber/Cyber_Butterfl1y.png';
+// import ballImg from './assets/cyber/Cyber_Butterfl1y.png';
+import ballImg from './assets/cyber2/Cyber_Butterfl1y (2).png';
 import tracerImg from './assets/tracer_10.png';
 import fieldImg from './assets/night/wall_cyber_NightSky.png';
 import borderLongImg from './assets/cyber/canva_cyber_SeaBlue2_Long.png';
+import borderLongHorizontalImg from './assets/cyber2/canva_cyber_SeaBlue.png';
+import borderLongHorizontal2Img from './assets/cyber2/canva_cyber_SeaBlue2.png';
 
 // import sound assets
 import explosionSound from './assets/sound/explosion.wav';
@@ -113,6 +119,9 @@ function App() {
     const [antiscoreText, setAntiscoreText] = useState('0');
 
     useEffect(() => {
+        // Prevent scrolling
+        window.addEventListener('ontouchmove', (e) => e.preventDefault());
+
         // Set initial apple position
         position.current.appleX = cnst.appleDiameter + Math.random() * (cnst.fieldWidth - cnst.appleDiameter * 2);
         position.current.appleY = cnst.appleDiameter + Math.random() * (cnst.fieldHeight - cnst.appleDiameter * 2);
@@ -475,11 +484,6 @@ function App() {
         clearTimeout(showTracersTimeout.current);
     }
 
-    function handleTouchMove(e: React.TouchEvent) {
-        if (paused.current) return;
-        e.preventDefault();
-    }
-
     function pauseGame() {
         paused.current = true;
         const newBoomerangStyle: CSSProperties = {
@@ -516,10 +520,11 @@ function App() {
                     onTouchStart={handleMouseDown}
                     onMouseUp={handleMouseRelease}
                     onTouchEnd={() => { handleMouseRelease(); handleFieldClick(); }}
-                    onTouchMove={handleTouchMove}
                 >
                     <img key="field" className="fieldImg" src={fieldImg} />
                     <img key="border-long" className="border-long" src={borderLongImg} />
+                    <img key="border-long-horizontal" className="border-long-horizontal" src={borderLongHorizontalImg} />
+                    <img key="border-long-horizontal-2" className="border-long-horizontal-2" src={borderLongHorizontal2Img} />
                     {
                         tracerCoords.current.map((coords, index) =>
                             <img key={`tracer-${index}`}

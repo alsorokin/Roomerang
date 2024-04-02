@@ -130,6 +130,20 @@
     visibility: hidden;
 }
 
+.border-long-horizontal {
+    position: absolute;
+    top: -80px;
+    left: -2px;
+    visibility: visible;
+}
+
+.border-long-horizontal-2 {
+    position: absolute;
+    top: -80px;
+    left: 200px;
+    visibility: visible;
+}
+
 .fieldImg {
     position: absolute;
     width: 400px;
