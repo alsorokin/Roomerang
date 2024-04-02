@@ -459,12 +459,13 @@ function App() {
         }
     }
 
-    function handleMouseDown() {
+    function handleMouseDown(e: React.MouseEvent | React.TouchEvent) {
         if (paused.current) return;
         clearTimeout(showTracersTimeout.current);
         showTracersTimeout.current = setTimeout(() => {
                 drawBoomTracers.current = true;
         }, cnst.tracerDrawDelay);
+        e.preventDefault();
     }
 
     function handleMouseRelease() {
