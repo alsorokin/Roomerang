@@ -3,6 +3,7 @@ import './App.css';
 import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY, getScoreGain } from './helpers';
 import cnst from './constants';
 import ai from './ai';
+import { SoundSystem } from './soundSystem';
 
 // import image assets
 // import boomerangImg from './assets/Bum3.2_42.png';
@@ -96,6 +97,7 @@ function App({ children }: PropsWithChildren) {
     const antiboomEnabled = useRef(false);
     const ballEnabled = useRef(false);
     const soundEnabled = useRef(true);
+    const soundSystem = useRef(new SoundSystem());
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -154,6 +156,13 @@ function App({ children }: PropsWithChildren) {
             tracerCoords.current[i] = { x: -10000, y: -10000 };
         }
 
+        // init sound system
+        soundSystem.current.loadSound('explosion', explosionSound);
+        soundSystem.current.loadSound('boomerang', boomerangSound);
+        soundSystem.current.loadSound('antiboomerang', antiboomerangSound);
+        soundSystem.current.loadSound('boomApple', boomAppleSound);
+        soundSystem.current.loadSound('antiboomApple', antiboomAppleSound);
+
         // Game loop
         const gameLoop = setInterval(() => {
             if (boom.current === null || antiboom.current == null) return;
@@ -185,8 +194,7 @@ function App({ children }: PropsWithChildren) {
                     lastAiCheck.current += 7000; // postpone next AI check
                     // play sound
                     if (soundEnabled.current) {
-                        const audio = new Audio(antiboomerangSound);
-                        audio.play();
+                        soundSystem.current.playSound('antiboomerang');
                     }
                 }
             }
@@ -326,8 +334,7 @@ function App({ children }: PropsWithChildren) {
                     setScoreText((score.current).toString());
                     // play sound
                     if (soundEnabled.current) {
-                        const audio = new Audio(boomAppleSound);
-                        audio.play();
+                        soundSystem.current.playSound('boomApple');
                     }
                 }
             }
@@ -346,8 +353,7 @@ function App({ children }: PropsWithChildren) {
                     setAntiscoreText((antiscore.current).toString());
                     // play sound
                     if (soundEnabled.current) {
-                        const audio = new Audio(antiboomAppleSound);
-                        audio.play();
+                        soundSystem.current.playSound('antiboomApple');
                     }
                 }
             }
@@ -365,8 +371,7 @@ function App({ children }: PropsWithChildren) {
                     boomerangIncapacityRemaining.current = cnst.incapacityDuration;
                     // play sound
                     if (soundEnabled.current) {
-                        const audio = new Audio(explosionSound);
-                        audio.play();
+                        soundSystem.current.playSound('explosion');
                     }
                 } else if (antiboomEnabled.current &&
                     distanceBetweenPoints(
@@ -383,8 +388,7 @@ function App({ children }: PropsWithChildren) {
                     antiboomerangIncapacityRemaining.current = cnst.incapacityDuration;
                     // play sound
                     if (soundEnabled.current) {
-                        const audio = new Audio(explosionSound);
-                        audio.play();
+                        soundSystem.current.playSound('explosion');
                     }
                 }
             }
@@ -491,8 +495,7 @@ function App({ children }: PropsWithChildren) {
             boomerangLaunched.current = true;
             // play sound
             if (soundEnabled.current) {
-                const audio = new Audio(boomerangSound);
-                audio.play();
+                soundSystem.current.playSound('boomerang');
             }
         }
     }
