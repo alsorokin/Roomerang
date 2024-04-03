@@ -12,8 +12,14 @@ export class SoundSystem {
         this.sounds[name] = new Audio(path);
     }
     playSound(name: string) {
-        if (this.sounds[name].ended || this.sounds[name].paused || this.sounds[name].currentTime === 0) {
+        const sound = this.sounds[name];
+        if (sound.ended || sound.paused || sound.currentTime === 0) {
             this.sounds[name].play();
+        } else {
+            // if the sound is already playing, restart it
+            sound.pause();
+            sound.currentTime = 0;
+            sound.play();
         }
     }
     stopSound(name: string) {
