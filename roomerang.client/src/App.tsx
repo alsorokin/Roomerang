@@ -203,8 +203,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                     momentum.current.antiboomY,
                     position.current.appleX,
                     position.current.appleY,
-                    position.current.ballX,
-                    position.current.ballY,
+                    ballEnabled.current ? position.current.ballX : 0,
+                    ballEnabled.current ? position.current.ballY : 0,
                 );
                 if (shouldLaunchAntiboomerang) {
                     antiboomerangLaunched.current = true;

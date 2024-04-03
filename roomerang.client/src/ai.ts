@@ -15,7 +15,7 @@ export default function ai(boomX: number, boomY: number, momX: number, momY: num
         predictionX += predictionMomentumX;
         predictionMomentumY = calculateMomentumY(predictionMomentumY, predictionY);
         predictionY += predictionMomentumY;
-        if (distanceBetweenPoints(predictionX, predictionY, ballX, ballY) < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
+        if (ballX && ballY && distanceBetweenPoints(predictionX, predictionY, ballX, ballY) < cnst.boomerangDiameter / 2 + cnst.ballDiameter / 2) {
             return false;
         } else if (distanceBetweenPoints(predictionX, predictionY, appleX, appleY) < cnst.boomerangDiameter / 2 + cnst.appleDiameter / 2) {
             return true;
