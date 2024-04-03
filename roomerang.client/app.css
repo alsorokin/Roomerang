@@ -111,27 +111,27 @@
 
 .ballToggle {
     position: absolute;
-    left: 25px;
+    left: 100px;
     top: 10px;
-}
-
-.pause {
-    position: absolute;
-    left: 140px;
-    top: 10px;
-    width: 90px;
 }
 
 .aboomToggle {
     position: absolute;
-    left: 245px;
+    left: 201px;
     top: 10px;
-    width: 185px;
+    width: 90px;
+}
+
+.pause {
+    position: absolute;
+    left: 423px;
+    top: 10px;
+    width: 77px;
 }
 
 .soundToggle {
     position: absolute;
-    left: 445px;
+    left: 292px;
     top: 10px;
     width: 130px;
 }

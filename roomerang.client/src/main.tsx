@@ -4,9 +4,9 @@ import GameWindow from './GameWindow'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <GameWindow />
-  </React.StrictMode>,
+    <React.StrictMode>
+        <GameWindow />
+    </React.StrictMode>
 )
 
 // Disable right-click context menu

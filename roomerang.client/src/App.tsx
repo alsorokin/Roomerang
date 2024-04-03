@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, CSSProperties, PropsWithChildren } from 'react';
+import { useRef, useEffect, useState, CSSProperties, PropsWithChildren, useContext } from 'react';
 import './App.css';
 import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY, getScoreGain } from './helpers';
 import cnst from './constants';
@@ -28,6 +28,7 @@ import boomerangSound from './assets/sound/jump_m_1.wav';
 import antiboomerangSound from './assets/sound/jump_m_2.wav';
 import boomAppleSound from './assets/sound/coin_m.wav';
 import antiboomAppleSound from './assets/sound/synth.wav';
+import boomerangContext, { BoomerangContext } from './boomerangContext';
 
 interface Coords {
     x: number;
@@ -43,9 +44,16 @@ interface FloatingScore {
     id: number;
 }
 
+type AppProps = {
+    setBoomContext: React.Dispatch<React.SetStateAction<BoomerangContext>>;
+}
+
 const initialBoomerangStyle: CSSProperties = { left: '', top: '', animationPlayState: "paused", visibility: 'visible' };
 
-function App({ children }: PropsWithChildren) {
+function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
+    // Context
+    const gameContext = useContext(boomerangContext);
+
     // Refs
     const boom = useRef<HTMLImageElement | null>(null);
     const antiboom = useRef<HTMLImageElement | null>(null);
@@ -87,7 +95,6 @@ function App({ children }: PropsWithChildren) {
     const showTracersTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
     const ticks = useRef(0);
     const lastAiCheck = useRef(0);
-    const paused = useRef(false);
     const lastBallMove = useRef(0);
     const tracerDrawCount = useRef(0);
     const floatingScores = useRef<FloatingScore[]>([]);
@@ -98,6 +105,7 @@ function App({ children }: PropsWithChildren) {
     const ballEnabled = useRef(false);
     const soundEnabled = useRef(true);
     const soundSystem = useRef(new SoundSystem());
+    const boomContextRef = useRef<BoomerangContext>(gameContext);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -118,6 +126,9 @@ function App({ children }: PropsWithChildren) {
     });
     const [scoreText, setScoreText] = useState('0');
     const [antiscoreText, setAntiscoreText] = useState('0');
+
+    // Update refs on rerender
+    boomContextRef.current = gameContext;
 
     useEffect(() => {
         // Prevent scrolling
@@ -163,10 +174,16 @@ function App({ children }: PropsWithChildren) {
         soundSystem.current.loadSound('boomApple', boomAppleSound);
         soundSystem.current.loadSound('antiboomApple', antiboomAppleSound);
 
+        // init context
+        setBoomContext({
+            paused: boomContextRef.current.paused,
+            setPaused: setPaused,
+        });
+
         // Game loop
         const gameLoop = setInterval(() => {
             if (boom.current === null || antiboom.current == null) return;
-            if (paused.current) return;
+            if (boomContextRef.current.paused) return;
 
             ticks.current += cnst.renderInterval;
             if (boomerangIncapacityRemaining.current >= 0) boomerangIncapacityRemaining.current -= cnst.renderInterval;
@@ -490,7 +507,7 @@ function App({ children }: PropsWithChildren) {
     }, []);
 
     function handleFieldClick() {
-        if (paused.current) return;
+        if (boomContextRef.current.paused) return;
         if (!boomerangLaunched.current && boomerangIncapacityRemaining.current <= 0) {
             boomerangLaunched.current = true;
             // play sound
@@ -501,7 +518,7 @@ function App({ children }: PropsWithChildren) {
     }
 
     function handleMouseDown(e: React.MouseEvent | React.TouchEvent) {
-        if (paused.current) return;
+        if (boomContextRef.current.paused) return;
         clearTimeout(showTracersTimeout.current);
         showTracersTimeout.current = setTimeout(() => {
                 drawBoomTracers.current = true;
@@ -510,38 +527,41 @@ function App({ children }: PropsWithChildren) {
     }
 
     function handleMouseRelease() {
-        if (paused.current) return;
+        if (boomContextRef.current.paused) return;
         drawBoomTracers.current = false;
         drawAntiboomTracers.current = false;
         clearTimeout(showTracersTimeout.current);
     }
 
-    function pauseGame() {
-        paused.current = true;
-        const newBoomerangStyle: CSSProperties = {
-            top: position.current.boomY - cnst.boomerangDiameter / 2,
-            left: position.current.boomX - cnst.boomerangDiameter / 2,
-            animationPlayState: 'paused',
-        };
-        setBoomerangStyle(newBoomerangStyle);
-        const newAntiboomerangStyle: CSSProperties = {
-            top: position.current.antiboomY - cnst.boomerangDiameter / 2,
-            left: position.current.antiboomX - cnst.boomerangDiameter / 2,
-            animationPlayState: 'paused',
-            visibility: antiboomEnabled.current ? 'visible' : 'hidden',
-        };
-        setAntiboomerangStyle(newAntiboomerangStyle);
-        const newBallStyle: CSSProperties = {
-            top: position.current.ballY - cnst.ballDiameter / 2,
-            left: position.current.ballX - cnst.ballDiameter / 2,
-            animationPlayState: 'paused',
-            visibility: ballEnabled.current ? 'visible' : 'hidden',
-        };
-        setBallStyle(newBallStyle);
-    }
-
-    function unpauseGame() {
-        paused.current = false;
+    function setPaused(paused: boolean) {
+        if (paused) {
+            const newBoomerangStyle: CSSProperties = {
+                top: position.current.boomY - cnst.boomerangDiameter / 2,
+                left: position.current.boomX - cnst.boomerangDiameter / 2,
+                animationPlayState: 'paused',
+            };
+            setBoomerangStyle(newBoomerangStyle);
+            const newAntiboomerangStyle: CSSProperties = {
+                top: position.current.antiboomY - cnst.boomerangDiameter / 2,
+                left: position.current.antiboomX - cnst.boomerangDiameter / 2,
+                animationPlayState: 'paused',
+                visibility: antiboomEnabled.current ? 'visible' : 'hidden',
+            };
+            setAntiboomerangStyle(newAntiboomerangStyle);
+            const newBallStyle: CSSProperties = {
+                top: position.current.ballY - cnst.ballDiameter / 2,
+                left: position.current.ballX - cnst.ballDiameter / 2,
+                animationPlayState: 'paused',
+                visibility: ballEnabled.current ? 'visible' : 'hidden',
+            };
+            setBallStyle(newBallStyle);
+        } else {
+            // nothing to do currently
+        }
+        setBoomContext({
+            ...boomContextRef.current,
+            paused: paused,
+        });
     }
 
     function enableAntiboomerang() {
@@ -621,23 +641,16 @@ function App({ children }: PropsWithChildren) {
             </div>
             <input
                 type="button"
-                key="pauseButton"
-                className={paused.current ? "btn pause red" : "btn pause green"}
-                value={paused.current ? "Unpause" : "Pause"}
-                onClick={() => paused.current ? unpauseGame() : pauseGame()}
-            />
-            <input
-                type="button"
                 key="aboomToggleButton"
                 className={antiboomEnabled.current ? "btn aboomToggle green" : "btn aboomToggle red"}
-                value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"}
+                value={antiboomEnabled.current ? "Disable AI" : "Enable AI"}
                 onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang()}
             />
             <input
                 type="button"
                 key="ballToggleButton"
                 className={ballEnabled.current ? "btn ballToggle green" : "btn ballToggle red"}
-                value={ballEnabled.current ? "Disable ball" : "Enable ball"}
+                value={ballEnabled.current ? "Disable Ball" : "Enable Ball"}
                 onClick={() => ballEnabled.current ? disableBall() : enableBall()}
             />
             <input
