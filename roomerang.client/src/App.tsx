@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, CSSProperties } from 'react';
+import { useRef, useEffect, useState, CSSProperties, PropsWithChildren } from 'react';
 import './App.css';
 import { distanceBetweenPoints, normalizeVector, calculateMomentumX, calculateMomentumY, getScoreGain } from './helpers';
 import cnst from './constants';
@@ -20,10 +20,6 @@ import appleNextImg from './assets/apple_green_28.png';
 // import ballImg from './assets/cyber/Cyber_Butterfl1y.png';
 import ballImg from './assets/cyber2/Cyber_Butterfl1y (2).png';
 import tracerImg from './assets/tracer_10.png';
-import fieldImg from './assets/night/wall_cyber_NightSky.png';
-import borderLongImg from './assets/cyber/canva_cyber_SeaBlue2_Long.png';
-import borderLongHorizontalImg from './assets/cyber2/canva_cyber_SeaBlue.png';
-import borderLongHorizontal2Img from './assets/cyber2/canva_cyber_SeaBlue2.png';
 
 // import sound assets
 import explosionSound from './assets/sound/explosion.wav';
@@ -48,7 +44,7 @@ interface FloatingScore {
 
 const initialBoomerangStyle: CSSProperties = { left: '', top: '', animationPlayState: "paused", visibility: 'visible' };
 
-function App() {
+function App({ children }: PropsWithChildren) {
     // Refs
     const boom = useRef<HTMLImageElement | null>(null);
     const antiboom = useRef<HTMLImageElement | null>(null);
@@ -583,78 +579,72 @@ function App() {
     }
 
     return (
-        <div className="fieldContainer">
-            <div className="gameWindow">
-                <div className="gameVersion">{process.env.VERSION}</div>
-                <div className="field"
-                    onClick={handleFieldClick}
-                    onMouseDown={handleMouseDown}
-                    onTouchStart={handleMouseDown}
-                    onMouseUp={handleMouseRelease}
-                    onTouchEnd={() => { handleMouseRelease(); handleFieldClick(); }}
-                >
-                    <img key="field" className="fieldImg" src={fieldImg} />
-                    <img key="border-long" className="border-long" src={borderLongImg} />
-                    <img key="border-long-horizontal" className="border-long-horizontal" src={borderLongHorizontalImg} />
-                    <img key="border-long-horizontal-2" className="border-long-horizontal-2" src={borderLongHorizontal2Img} />
-                    {
-                        tracerCoords.current.map((coords, index) =>
-                            <img key={`tracer-${index}`}
-                                className="tracer"
-                                style={{ left: coords ? coords.x + 'px' : '', top: coords ? coords.y + 'px' : '' }}
-                                src={tracerImg} />
-                        )
-                    }
-                    <div key="score-bottom" className="score bottom">{scoreText}</div>
-                    <div key="score-top" className="score top" style={{ visibility: antiboomEnabled.current ? 'visible' : 'hidden' }}>{antiscoreText}</div>
-                    <img key="boomerang" ref={boom} className="boom bottom" src={boomerangImg} style={boomerangStyle} />
-                    <img key="antiboomerang" ref={antiboom} className="boom top" src={antiboomerangImg} style={antiboomerangStyle} />
-                    <img key="apple" ref={apple} className="apple" src={appleImg} style={appleStyle} />
-                    <img key="apple-next" ref={appleNext} className="apple next" src={appleNextImg} style={appleNextStyle} />
-                    <img key="ball" ref={ball} className="ball" src={ballImg} style={ballStyle} />
-                    {
-                        floatingScores.current.map((fs) =>
-                            <div key={`floating-score-${fs.id}`}
-                                className="score fading"
-                                style={{
-                                    top: fs.coords.y + "px",
-                                    left: fs.coords.x + "px",
-                                    color: fs.color,
-                                    fontSize: fs.textSize + "px",
-                                }}>{fs.score}</div>
-                        )
-                    }
-                </div>
-                <input
-                    type="button"
-                    key="pauseButton"
-                    className={paused.current ? "btn pause red" : "btn pause green"}
-                    value={paused.current ? "Unpause" : "Pause"}
-                    onClick={() => paused.current ? unpauseGame() : pauseGame()}
-                />
-                <input
-                    type="button"
-                    key="aboomToggleButton"
-                    className={antiboomEnabled.current ? "btn aboomToggle green" : "btn aboomToggle red"}
-                    value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"}
-                    onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang()}
-                />
-                <input
-                    type="button"
-                    key="ballToggleButton"
-                    className={ballEnabled.current ? "btn ballToggle green" : "btn ballToggle red"}
-                    value={ballEnabled.current ? "Disable ball" : "Enable ball"}
-                    onClick={() => ballEnabled.current ? disableBall() : enableBall()}
-                />
-                <input
-                    type="button"
-                    key="soundToggleButton"
-                    className={soundEnabled.current ? "btn soundToggle green" : "btn soundToggle red"}
-                    value={soundEnabled.current ? "Disable sound" : "Enable sound"}
-                    onClick={() => soundEnabled.current = !soundEnabled.current}
-                />
+        <>
+            <div className="field"
+                onClick={handleFieldClick}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleMouseDown}
+                onMouseUp={handleMouseRelease}
+                onTouchEnd={() => { handleMouseRelease(); handleFieldClick(); }}
+            >
+                {children}
+                {
+                    tracerCoords.current.map((coords, index) =>
+                        <img key={`tracer-${index}`}
+                            className="tracer"
+                            style={{ left: coords ? coords.x + 'px' : '', top: coords ? coords.y + 'px' : '' }}
+                            src={tracerImg} />
+                    )
+                }
+                <div key="score-bottom" className="score bottom">{scoreText}</div>
+                <div key="score-top" className="score top" style={{ visibility: antiboomEnabled.current ? 'visible' : 'hidden' }}>{antiscoreText}</div>
+                <img key="boomerang" ref={boom} className="boom bottom" src={boomerangImg} style={boomerangStyle} />
+                <img key="antiboomerang" ref={antiboom} className="boom top" src={antiboomerangImg} style={antiboomerangStyle} />
+                <img key="apple" ref={apple} className="apple" src={appleImg} style={appleStyle} />
+                <img key="apple-next" ref={appleNext} className="apple next" src={appleNextImg} style={appleNextStyle} />
+                <img key="ball" ref={ball} className="ball" src={ballImg} style={ballStyle} />
+                {
+                    floatingScores.current.map((fs) =>
+                        <div key={`floating-score-${fs.id}`}
+                            className="score fading"
+                            style={{
+                                top: fs.coords.y + "px",
+                                left: fs.coords.x + "px",
+                                color: fs.color,
+                                fontSize: fs.textSize + "px",
+                            }}>{fs.score}</div>
+                    )
+                }
             </div>
-        </div>
+            <input
+                type="button"
+                key="pauseButton"
+                className={paused.current ? "btn pause red" : "btn pause green"}
+                value={paused.current ? "Unpause" : "Pause"}
+                onClick={() => paused.current ? unpauseGame() : pauseGame()}
+            />
+            <input
+                type="button"
+                key="aboomToggleButton"
+                className={antiboomEnabled.current ? "btn aboomToggle green" : "btn aboomToggle red"}
+                value={antiboomEnabled.current ? "Disable top boomerang" : "Enable top boomerang"}
+                onClick={() => antiboomEnabled.current ? disableAntiboomerang() : enableAntiboomerang()}
+            />
+            <input
+                type="button"
+                key="ballToggleButton"
+                className={ballEnabled.current ? "btn ballToggle green" : "btn ballToggle red"}
+                value={ballEnabled.current ? "Disable ball" : "Enable ball"}
+                onClick={() => ballEnabled.current ? disableBall() : enableBall()}
+            />
+            <input
+                type="button"
+                key="soundToggleButton"
+                className={soundEnabled.current ? "btn soundToggle green" : "btn soundToggle red"}
+                value={soundEnabled.current ? "Disable sound" : "Enable sound"}
+                onClick={() => soundEnabled.current = !soundEnabled.current}
+            />
+        </>
     );
 }
 
