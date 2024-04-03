@@ -1,6 +1,6 @@
 const constants = {
-    boomerangDiameter: 42,
-    appleDiameter: 28,
+    boomerangDiameter: 54,
+    appleDiameter: 38,
     appleNextDiameter: 10,
     ballDiameter: 42,
     fieldWidth: 400,

@@ -5,8 +5,8 @@
     animation-name: rotation;
     animation-duration: 1s;
     animation-play-state: paused;
-    width: 42px;
-    height: 42px;
+    width: 54px;
+    height: 54px;
 }
 
 .boom.top {
@@ -21,8 +21,8 @@
 
 .apple {
     position: absolute;
-    width: 28px;
-    height: 28px;
+    width: 38px;
+    height: 38px;
 }
 
 .apple.next {
@@ -66,7 +66,7 @@
 
 .score {
     position: absolute;
-    font-size: 24px;
+    font-size: 34px;
     text-shadow: 1px 1px 2px grey;
 }
 
@@ -80,7 +80,7 @@
 
 .score.bottom {
     left: 0px;
-    top: 633px;
+    top: 623px;
     text-align: right;
     width: 390px;
     color: mediumpurple;
