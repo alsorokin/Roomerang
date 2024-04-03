@@ -162,16 +162,16 @@
 
 .border-long-horizontal {
     position: absolute;
-    top: -80px;
-    left: -2px;
-    visibility: visible;
+    top: -13px;
+    left: 0px;
+    visibility: hidden;
 }
 
 .border-long-horizontal-2 {
     position: absolute;
-    top: -80px;
-    left: 200px;
-    visibility: visible;
+    top: -13px;
+    left: 196px;
+    visibility: hidden;
 }
 
 .fieldImg {
