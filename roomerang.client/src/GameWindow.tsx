@@ -57,6 +57,22 @@ function GameWindow() {
         thumb.ondragstart = function () {
             return false;
         };
+
+        slider.addEventListener('click', (event: MouseEvent) => {
+            let newLeft = event.clientX - slider.getBoundingClientRect().left - thumb.offsetWidth / 2;
+            const rightEdge = slider.offsetWidth - thumb.offsetWidth;
+            if (newLeft < 0) {
+                newLeft = 0;
+            }
+            if (newLeft > rightEdge) {
+                newLeft = rightEdge;
+            }
+            thumb.style.left = newLeft + 'px';
+            const newVolume = Math.round((newLeft / rightEdge) * 100);
+            if (newVolume !== boomContext.soundVolume) {
+                setBoomContext({ ...boomContext, soundVolume: newVolume });
+            }
+        });
     }, []);
 
     return (
