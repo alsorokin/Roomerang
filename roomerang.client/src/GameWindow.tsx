@@ -43,7 +43,7 @@ function GameWindow() {
                 thumb.style.left = newLeft + 'px';
                 const newVolume = Math.round((newLeft / rightEdge) * 100);
                 if (newVolume !== boomContext.soundVolume) {
-                    setBoomContext({ ...boomContext, soundVolume: newVolume });
+                    setBoomContext((cntxt) => { return { ...cntxt, soundVolume: newVolume } });
                 }
             }
 
@@ -70,7 +70,7 @@ function GameWindow() {
             thumb.style.left = newLeft + 'px';
             const newVolume = Math.round((newLeft / rightEdge) * 100);
             if (newVolume !== boomContext.soundVolume) {
-                setBoomContext({ ...boomContext, soundVolume: newVolume });
+                setBoomContext((cntxt) => { return { ...cntxt, soundVolume: newVolume } });
             }
         });
     }, []);
