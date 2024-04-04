@@ -3,11 +3,62 @@ import fieldImg from './assets/night/wall_cyber_NightSky.png';
 import borderLongImg from './assets/cyber/canva_cyber_SeaBlue2_Long.png';
 import borderLongHorizontalImg from './assets/cyber2/canva_cyber_SeaBlue.png';
 import borderLongHorizontal2Img from './assets/cyber2/canva_cyber_SeaBlue2.png';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import boomerangContext, { BoomerangContext } from './boomerangContext';
 
 function GameWindow() {
-    const [boomContext, setBoomContext] = useState <BoomerangContext>({ paused: false, setPaused: () => { } });
+    const [boomContext, setBoomContext] = useState<BoomerangContext>({
+        paused: false,
+        setPaused: () => { },
+        soundVolume: 75,
+    });
+
+    useEffect(() => {
+        let slider = document.querySelector('#slider') as HTMLElement;
+        if (!slider) return;
+        let thumb = slider.querySelector('#thumb') as HTMLElement;
+        if (!thumb) return;
+
+        thumb.addEventListener('mousedown', (event: MouseEvent) => {
+            event.preventDefault(); // prevent selection start (browser action)
+
+            let shiftX = event.clientX - thumb.getBoundingClientRect().left;
+            // shiftY not needed, the thumb moves only horizontally
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+
+            function onMouseMove(event: MouseEvent) {
+                let newLeft = event.clientX - shiftX - slider.getBoundingClientRect().left;
+
+                // the pointer is out of slider => lock the thumb within the bounaries
+                if (newLeft < 0) {
+                    newLeft = 0;
+                }
+                const rightEdge = slider.offsetWidth - thumb.offsetWidth;
+                if (newLeft > rightEdge) {
+                    newLeft = rightEdge;
+                }
+
+                thumb.style.left = newLeft + 'px';
+                const newVolume = Math.round((newLeft / rightEdge) * 100);
+                if (newVolume !== boomContext.soundVolume) {
+                    setBoomContext({ ...boomContext, soundVolume: newVolume });
+                }
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mouseup', onMouseUp);
+                document.removeEventListener('mousemove', onMouseMove);
+            }
+
+        });
+
+        thumb.ondragstart = function () {
+            return false;
+        };
+    }, []);
+
     return (
         <boomerangContext.Provider value={boomContext}>
             <div className="fieldContainer">
@@ -19,6 +70,16 @@ function GameWindow() {
                         value={boomContext.paused ? "Resume" : "Pause"}
                         onClick={() => boomContext.setPaused(!boomContext.paused)}
                     />
+                    <input
+                        type="button"
+                        key="soundToggleButton"
+                        className="btn soundToggle green"
+                        value={`Volume: ${boomContext.soundVolume}`}
+                        onClick={() => { } } // TODO: Toggle the visibility of the sound slider
+                    />
+                    <div id="slider" className="slider">
+                        <div id="thumb" className="thumb"></div>
+                    </div>
                     <App setBoomContext={setBoomContext}>
                         <img key="field" className="fieldImg" src={fieldImg} />
                         <img key="border-long" className="border-long" src={borderLongImg} />

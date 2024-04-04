@@ -3,13 +3,16 @@ type Sounds = {
 }
 
 export class SoundSystem {
-    sounds: Sounds = { };
+    sounds: Sounds = {};
+    _volume: number = 75;
 
     constructor() {
         this.sounds = {};
     }
     loadSound(name: string, path: string) {
-        this.sounds[name] = new Audio(path);
+        const newSound = new Audio(path);
+        newSound.volume = this._volume / 100;
+        this.sounds[name] = newSound;
     }
     playSound(name: string) {
         const sound = this.sounds[name];
@@ -25,5 +28,12 @@ export class SoundSystem {
     stopSound(name: string) {
         this.sounds[name].pause();
         this.sounds[name].currentTime = 0;
+    }
+    setVolume(volume: number) {
+        if (this._volume === volume || volume < 0 || volume > 100) return;
+        this._volume = volume;
+        for (const sound in this.sounds) {
+            this.sounds[sound].volume = volume / 100;
+        }
     }
 }

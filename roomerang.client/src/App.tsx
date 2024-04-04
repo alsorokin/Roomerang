@@ -173,11 +173,13 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
         soundSystem.current.loadSound('antiboomerang', antiboomerangSound);
         soundSystem.current.loadSound('boomApple', boomAppleSound);
         soundSystem.current.loadSound('antiboomApple', antiboomAppleSound);
+        soundSystem.current.setVolume(boomContextRef.current.soundVolume);
 
-        // init context
+        // add handlers to the context
         setBoomContext({
             paused: boomContextRef.current.paused,
             setPaused: setPaused,
+            soundVolume: boomContextRef.current.soundVolume,
         });
 
         // Game loop
@@ -185,9 +187,13 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
             if (boom.current === null || antiboom.current == null) return;
             if (boomContextRef.current.paused) return;
 
+            // tick
             ticks.current += cnst.renderInterval;
             if (boomerangIncapacityRemaining.current >= 0) boomerangIncapacityRemaining.current -= cnst.renderInterval;
             if (antiboomerangIncapacityRemaining.current >= 0) antiboomerangIncapacityRemaining.current -= cnst.renderInterval;
+
+            // set sound volume
+            soundSystem.current.setVolume(boomContextRef.current.soundVolume);
 
             // Ask AI if we should launch antiboomerang
             if (antiboomEnabled.current &&
@@ -652,13 +658,6 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                 className={ballEnabled.current ? "btn ballToggle green" : "btn ballToggle red"}
                 value={ballEnabled.current ? "Disable Ball" : "Enable Ball"}
                 onClick={() => ballEnabled.current ? disableBall() : enableBall()}
-            />
-            <input
-                type="button"
-                key="soundToggleButton"
-                className={soundEnabled.current ? "btn soundToggle green" : "btn soundToggle red"}
-                value={soundEnabled.current ? "Disable sound" : "Enable sound"}
-                onClick={() => soundEnabled.current = !soundEnabled.current}
             />
         </>
     );
