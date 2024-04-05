@@ -12,6 +12,7 @@ function GameWindow() {
         setPaused: () => { },
         soundVolume: 75,
     });
+    const [soundSliderVisible, setSoundSliderVisible] = useState(false);
 
     useEffect(() => {
         let slider = document.querySelector('#slider') as HTMLElement;
@@ -89,11 +90,11 @@ function GameWindow() {
                     <input
                         type="button"
                         key="soundToggleButton"
-                        className="btn soundToggle green"
+                        className={soundSliderVisible ? "btn soundToggle red" : "btn soundToggle green" }
                         value={`Volume: ${boomContext.soundVolume}`}
-                        onClick={() => { } } // TODO: Toggle the visibility of the sound slider
+                        onClick={() => { setSoundSliderVisible(!soundSliderVisible) }}
                     />
-                    <div id="slider" className="slider">
+                    <div id="slider" className="slider" style={{ display: soundSliderVisible ? 'block' : 'none' }}>
                         <div id="thumb" className="thumb"></div>
                     </div>
                     <App setBoomContext={setBoomContext}>
