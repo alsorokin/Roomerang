@@ -5,29 +5,29 @@
     animation-name: rotation;
     animation-duration: 1s;
     animation-play-state: paused;
-    width: 54px;
-    height: 54px;
+    width: 13.5%;
+    aspect-ratio: 1;
 }
 
 .boom.top {
-    left: 358px;
-    top: 0px;
+    right: 0;
+    top: 0;
 }
 
 .boom.bottom {
     left: 0;
-    top: 633px;
+    bottom: 0;
 }
 
 .apple {
     position: absolute;
-    width: 38px;
-    height: 38px;
+    width: 10%;
+    aspect-ratio: 1;
 }
 
 .apple.next {
-    width: 10px;
-    height: 10px;
+    width: 2%;
+    aspect-ratio: 1;
 }
 
 .ball {
@@ -37,24 +37,15 @@
     animation-name: rotation;
     animation-duration: 2s;
     animation-fill-mode: both;
-    width: 42px;
-    height: 42px;
+    width: 14%;
+    aspect-ratio: 1;
 }
 
 .gameWindow {
     position: absolute;
-    width: 600px;
-    height: 800px;
-    background-color: #f1f1f1;
-}
-
-.field {
-    position: absolute;
-    background-color: #bdaae6;
-    width: 400px;
-    height: 675px;
-    left: 100px;
-    top: 62px;
+    width: 100%;
+    height: 100%;
+    background-color: black;
 }
 
 .fieldContainer {
@@ -62,6 +53,28 @@
     align-items: center;
     justify-content: center;
     user-select: none;
+}
+
+.field {
+    position: absolute;
+    background-color: #bdaae6;
+    height: 85vh;
+    aspect-ratio: 0.5925925925925926;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    max-width: 100%;
+}
+
+.fieldImg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    left: 0;
+    top: 0;
 }
 
 .score {
@@ -79,10 +92,9 @@
 }
 
 .score.bottom {
-    left: 0px;
-    top: 623px;
+    right: 10px;
+    bottom: 0px;
     text-align: right;
-    width: 390px;
     color: mediumpurple;
 }
 
@@ -101,7 +113,7 @@
 }
 
 .btn {
-    width: 100px;
+    width: 130px;
     height: 35px;
     color: white;
     font-size: 16px;
@@ -109,31 +121,28 @@
     cursor: pointer;
 }
 
+.soundToggle {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+}
+
 .ballToggle {
     position: absolute;
-    left: 100px;
-    top: 10px;
+    left: 10px;
+    top: 50px;
 }
 
 .aboomToggle {
     position: absolute;
-    left: 201px;
-    top: 10px;
-    width: 90px;
+    left: 10px;
+    top: 90px;
 }
 
 .pause {
     position: absolute;
-    left: 423px;
-    top: 10px;
-    width: 77px;
-}
-
-.soundToggle {
-    position: absolute;
-    left: 292px;
-    top: 10px;
-    width: 130px;
+    left: 10px;
+    top: 130px;
 }
 
 @keyframes rotation {
@@ -174,15 +183,6 @@
     visibility: hidden;
 }
 
-.fieldImg {
-    position: absolute;
-    width: 400px;
-    height: 675px;
-    left: 0px;
-    top: 0px;
-    visibility: visible;
-}
-
 @keyframes fadeOut {
     from {
         opacity: 1;
@@ -205,8 +205,8 @@
 
 .slider {
     position: absolute;
-    left: 100px;
-    top: 45px;
+    left: 145px;
+    top: 17px;
     border-radius: 5px;
     background: #BEBEBE;
     width: 390px;

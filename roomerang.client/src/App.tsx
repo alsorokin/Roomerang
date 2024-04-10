@@ -57,9 +57,7 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
     // Refs
     const boom = useRef<HTMLImageElement | null>(null);
     const antiboom = useRef<HTMLImageElement | null>(null);
-    const apple = useRef<HTMLImageElement | null>(null);
-    const appleNext = useRef<HTMLImageElement | null>(null);
-    const ball = useRef<HTMLImageElement | null>(null);
+    const field = useRef<HTMLDivElement | null>(null);
     const position = useRef({
         boomX: cnst.boomerangDiameter / 2,
         boomY: cnst.boomerangInitialY,
@@ -106,6 +104,7 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
     const soundEnabled = useRef(true);
     const soundSystem = useRef(new SoundSystem());
     const boomContextRef = useRef<BoomerangContext>(gameContext);
+    const fieldResizeMultiplier = useRef(1);
 
     // State
     const [boomerangStyle, setBoomerangStyle] = useState(initialBoomerangStyle);
@@ -134,19 +133,22 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
         // Prevent scrolling
         window.addEventListener('ontouchmove', (e) => e.preventDefault());
 
+        // calculate ratio on resize
+        window.addEventListener('resize', handleWindowResize);
+
         // Set initial apple position
         position.current.appleX = cnst.appleDiameter + Math.random() * (cnst.fieldWidth - cnst.appleDiameter * 2);
         position.current.appleY = cnst.appleDiameter + Math.random() * (cnst.fieldHeight - cnst.appleDiameter * 2);
         const newAppleStyle = {
-            left: position.current.appleX - cnst.appleDiameter / 2 + 'px',
-            top: position.current.appleY - cnst.appleDiameter / 2 + 'px',
+            left: (position.current.appleX - cnst.appleDiameter / 2) * fieldResizeMultiplier.current + 'px',
+            top: (position.current.appleY - cnst.appleDiameter / 2) * fieldResizeMultiplier.current + 'px',
         };
         setAppleStyle(newAppleStyle);
         position.current.appleNextX = cnst.appleDiameter + Math.random() * (cnst.fieldWidth - cnst.appleDiameter * 2);
         position.current.appleNextY = cnst.appleDiameter + Math.random() * (cnst.fieldHeight - cnst.appleDiameter * 2);
         const newAppleNextStyle = {
-            left: position.current.appleNextX - cnst.appleNextDiameter / 2 + 'px',
-            top: position.current.appleNextY - cnst.appleNextDiameter / 2 + 'px',
+            left: (position.current.appleNextX - cnst.appleNextDiameter / 2) * fieldResizeMultiplier.current + 'px',
+            top: (position.current.appleNextY - cnst.appleNextDiameter / 2) * fieldResizeMultiplier.current + 'px',
         };
         setAppleNextStyle(newAppleNextStyle);
 
@@ -154,8 +156,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
         position.current.ballX = cnst.fieldWidth / 2;
         position.current.ballY = cnst.fieldHeight / 2;
         const newBallStyle: CSSProperties = {
-            left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
-            top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
+            left: (position.current.ballX - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
+            top: (position.current.ballY - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
             animationPlayState: 'paused',
             animationDirection: 'normal',
             visibility: 'hidden',
@@ -239,8 +241,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
             const boomVisibility = boomerangIncapacityRemaining.current > 0 &&
                 Math.floor(boomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0 ? 'hidden' : 'visible';
             const newBoomerangStyle: CSSProperties = {
-                left: position.current.boomX - cnst.boomerangDiameter / 2 + 'px',
-                top: position.current.boomY - cnst.boomerangDiameter / 2 + 'px',
+                left: (position.current.boomX - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                top: (position.current.boomY - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current + 'px',
                 animationPlayState: boomerangLaunched.current ? 'running' : 'paused',
                 visibility: boomVisibility,
             };
@@ -294,8 +296,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                 Math.floor(antiboomerangIncapacityRemaining.current / cnst.incapacityBlinkInterval) % 2 === 0) ?
                 'hidden' : 'visible';
             const newAntiboomerangStyle: CSSProperties = {
-                left: position.current.antiboomX - cnst.boomerangDiameter / 2 + 'px',
-                top: position.current.antiboomY - cnst.boomerangDiameter / 2 + 'px',
+                left: (position.current.antiboomX - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                top: (position.current.antiboomY - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current + 'px',
                 animationPlayState: antiboomerangLaunched.current ? 'running' : 'paused',
                 visibility: aboomVisibility,
             };
@@ -316,8 +318,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                     position.current.ballX = position.current.ballX + momentum.current.ballX;
                     position.current.ballY = position.current.ballY + momentum.current.ballY;
                     const newBallStyle = {
-                        left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
-                        top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
+                        left: (position.current.ballX - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                        top: (position.current.ballY - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
                         animationPlayState: ballMoving.current ? 'running' : 'paused',
                         animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
                     };
@@ -330,8 +332,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                     const rumbleX = Math.random() * 2 - 1;
                     const rumbleY = Math.random() * 2 - 1;
                     const newBallStyle = {
-                        left: position.current.ballX - cnst.ballDiameter / 2 + rumbleX + 'px',
-                        top: position.current.ballY - cnst.ballDiameter / 2 + rumbleY + 'px',
+                        left: (position.current.ballX - cnst.ballDiameter / 2 + rumbleX) * fieldResizeMultiplier.current + 'px',
+                        top: (position.current.ballY - cnst.ballDiameter / 2 + rumbleY) * fieldResizeMultiplier.current + 'px',
                         animationPlayState: 'paused',
                         animationDirection: 'normal',
                     };
@@ -421,8 +423,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                 position.current.appleX = position.current.appleNextX;
                 position.current.appleY = position.current.appleNextY;
                 const newAppleStyle = {
-                    left: position.current.appleX - cnst.appleDiameter / 2 + 'px',
-                    top: position.current.appleY - cnst.appleDiameter / 2 + 'px',
+                    left: (position.current.appleX - cnst.appleDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                    top: (position.current.appleY - cnst.appleDiameter / 2) * fieldResizeMultiplier.current + 'px',
                 };
                 setAppleStyle(newAppleStyle);
 
@@ -430,8 +432,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                 position.current.appleNextX = cnst.appleDiameter + Math.random() * (cnst.fieldWidth - cnst.appleDiameter * 2);
                 position.current.appleNextY = cnst.appleDiameter + Math.random() * (cnst.fieldHeight - cnst.appleDiameter * 2);
                 const newAppleNextStyle = {
-                    left: position.current.appleNextX - cnst.appleNextDiameter / 2 + 'px',
-                    top: position.current.appleNextY - cnst.appleNextDiameter / 2 + 'px',
+                    left: (position.current.appleNextX - cnst.appleNextDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                    top: (position.current.appleNextY - cnst.appleNextDiameter / 2) * fieldResizeMultiplier.current + 'px',
                 };
                 setAppleNextStyle(newAppleNextStyle);
             }
@@ -441,8 +443,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                 momentum.current.boomY = 0;
                 position.current.boomY = cnst.fieldHeight - cnst.boomerangDiameter / 2;
                 const newBoomStyle: CSSProperties = {
-                    left: position.current.boomX + 'px',
-                    top: position.current.boomY + 'px',
+                    left: position.current.boomX * fieldResizeMultiplier.current + 'px',
+                    top: position.current.boomY * fieldResizeMultiplier.current + 'px',
                     animationPlayState: 'paused',
                     visibility: 'visible',
                 };
@@ -454,8 +456,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                 momentum.current.antiboomY = 0;
                 position.current.antiboomY = cnst.boomerangDiameter / 2;
                 const newAntiboomStyle: CSSProperties = {
-                    left: position.current.antiboomX + 'px',
-                    top: position.current.antiboomY + 'px',
+                    left: position.current.antiboomX * fieldResizeMultiplier.current + 'px',
+                    top: position.current.antiboomY * fieldResizeMultiplier.current + 'px',
                     animationPlayState: 'paused',
                     visibility: 'visible',
                 };
@@ -475,8 +477,8 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
             momentum.current.ballX = vector.x * 3000 / cnst.momentumCoefficient;
             momentum.current.ballY = vector.y * 3000 / cnst.momentumCoefficient;
             const newBallStyle = {
-                left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
-                top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
+                left: (position.current.ballX - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                top: (position.current.ballY - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
                 animationPlayState: 'running',
                 animationDirection: momentum.current.ballX > 0 ? 'normal' : 'reverse',
             };
@@ -509,8 +511,41 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
         return () => {
             clearInterval(gameLoop);
             clearTimeout(showTracersTimeout.current);
+            window.removeEventListener('resize', handleWindowResize);
         };
     }, []);
+
+    function handleWindowResize() {
+        calculateFieldResizeMultiplier();
+        // update static elements' positions
+        if (!ballMoving.current && ballEnabled.current) {
+            const newBallStyle: CSSProperties = {
+                left: (position.current.ballX - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                top: (position.current.ballY - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
+                animationPlayState: 'paused',
+                animationDirection: 'normal',
+            };
+            setBallStyle(newBallStyle);
+        }
+        const newAppleStyle = {
+            left: (position.current.appleX - cnst.appleDiameter / 2) * fieldResizeMultiplier.current + 'px',
+            top: (position.current.appleY - cnst.appleDiameter / 2) * fieldResizeMultiplier.current + 'px',
+        };
+        setAppleStyle(newAppleStyle);
+        const newAppleNextStyle = {
+            left: (position.current.appleNextX - cnst.appleNextDiameter / 2) * fieldResizeMultiplier.current + 'px',
+            top: (position.current.appleNextY - cnst.appleNextDiameter / 2) * fieldResizeMultiplier.current + 'px',
+        };
+        setAppleNextStyle(newAppleNextStyle);
+
+    }
+
+    function calculateFieldResizeMultiplier() {
+        if (field.current === null) return;
+        const fieldWidth = field.current.clientWidth;
+        const fieldHeight = field.current.clientHeight;
+        fieldResizeMultiplier.current = Math.min(fieldWidth / cnst.fieldWidth, fieldHeight / cnst.fieldHeight);
+    }
 
     function handleFieldClick() {
         if (boomContextRef.current.paused) return;
@@ -542,21 +577,21 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
     function setPaused(paused: boolean) {
         if (paused) {
             const newBoomerangStyle: CSSProperties = {
-                top: position.current.boomY - cnst.boomerangDiameter / 2,
-                left: position.current.boomX - cnst.boomerangDiameter / 2,
+                top: (position.current.boomY - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current,
+                left: (position.current.boomX - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current,
                 animationPlayState: 'paused',
             };
             setBoomerangStyle(newBoomerangStyle);
             const newAntiboomerangStyle: CSSProperties = {
-                top: position.current.antiboomY - cnst.boomerangDiameter / 2,
-                left: position.current.antiboomX - cnst.boomerangDiameter / 2,
+                top: (position.current.antiboomY - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current,
+                left: (position.current.antiboomX - cnst.boomerangDiameter / 2) * fieldResizeMultiplier.current,
                 animationPlayState: 'paused',
                 visibility: antiboomEnabled.current ? 'visible' : 'hidden',
             };
             setAntiboomerangStyle(newAntiboomerangStyle);
             const newBallStyle: CSSProperties = {
-                top: position.current.ballY - cnst.ballDiameter / 2,
-                left: position.current.ballX - cnst.ballDiameter / 2,
+                top: (position.current.ballY - cnst.ballDiameter / 2) * fieldResizeMultiplier.current,
+                left: (position.current.ballX - cnst.ballDiameter / 2) * fieldResizeMultiplier.current,
                 animationPlayState: 'paused',
                 visibility: ballEnabled.current ? 'visible' : 'hidden',
             };
@@ -587,9 +622,11 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
         ballEnabled.current = true;
         position.current.ballX = cnst.fieldWidth / 2;
         position.current.ballY = cnst.fieldHeight / 2;
+        position.current.ballNextX = cnst.fieldWidth / 2;
+        position.current.ballNextY = cnst.fieldHeight / 2;
         const newBallStyle: CSSProperties = {
-            left: position.current.ballX - cnst.ballDiameter / 2 + 'px',
-            top: position.current.ballY - cnst.ballDiameter / 2 + 'px',
+            left: (position.current.ballX - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
+            top: (position.current.ballY - cnst.ballDiameter / 2) * fieldResizeMultiplier.current + 'px',
             animationPlayState: 'paused',
             animationDirection: 'normal',
             visibility: 'visible',
@@ -610,6 +647,7 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
     return (
         <>
             <div className="field"
+                ref={field}
                 onClick={handleFieldClick}
                 onMouseDown={handleMouseDown}
                 onTouchStart={handleMouseDown}
@@ -621,7 +659,7 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                     tracerCoords.current.map((coords, index) =>
                         <img key={`tracer-${index}`}
                             className="tracer"
-                            style={{ left: coords ? coords.x + 'px' : '', top: coords ? coords.y + 'px' : '' }}
+                            style={{ left: coords ? coords.x * fieldResizeMultiplier.current + 'px' : '', top: coords ? coords.y * fieldResizeMultiplier.current + 'px' : '' }}
                             src={tracerImg} />
                     )
                 }
@@ -629,16 +667,16 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
                 <div key="score-top" className="score top" style={{ visibility: antiboomEnabled.current ? 'visible' : 'hidden' }}>{antiscoreText}</div>
                 <img key="boomerang" ref={boom} className="boom bottom" src={boomerangImg} style={boomerangStyle} />
                 <img key="antiboomerang" ref={antiboom} className="boom top" src={antiboomerangImg} style={antiboomerangStyle} />
-                <img key="apple" ref={apple} className="apple" src={appleImg} style={appleStyle} />
-                <img key="apple-next" ref={appleNext} className="apple next" src={appleNextImg} style={appleNextStyle} />
-                <img key="ball" ref={ball} className="ball" src={ballImg} style={ballStyle} />
+                <img key="apple" className="apple" src={appleImg} style={appleStyle} />
+                <img key="apple-next" className="apple next" src={appleNextImg} style={appleNextStyle} />
+                <img key="ball" className="ball" src={ballImg} style={ballStyle} />
                 {
                     floatingScores.current.map((fs) =>
                         <div key={`floating-score-${fs.id}`}
                             className="score fading"
                             style={{
-                                top: fs.coords.y + "px",
-                                left: fs.coords.x + "px",
+                                top: fs.coords.y * fieldResizeMultiplier.current + "px",
+                                left: fs.coords.x * fieldResizeMultiplier.current + "px",
                                 color: fs.color,
                                 fontSize: fs.textSize + "px",
                             }}>{fs.score}</div>
