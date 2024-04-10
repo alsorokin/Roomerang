@@ -134,6 +134,7 @@ function App({ children, setBoomContext }: PropsWithChildren<AppProps>) {
         window.addEventListener('ontouchmove', (e) => e.preventDefault());
 
         // calculate ratio on resize
+        calculateFieldResizeMultiplier();
         window.addEventListener('resize', handleWindowResize);
 
         // Set initial apple position
